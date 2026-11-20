@@ -1,0 +1,546 @@
+{
+  "name": "HTTP_Lesson_Search_Extract",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# Search + Extract",
+        "height": 80,
+        "width": 352,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        128,
+        -176
+      ],
+      "id": "4669e342-8f9f-478f-945f-4bd9a0c6f976",
+      "name": "Sticky Note27"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/extract",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"urls\": {{ $json.url.toJsonString() }},\n  \"extract_depth\": \"advanced\"\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        64,
+        480
+      ],
+      "id": "63ec2ab6-3c27-4ba6-a74f-9bfc4ee63eeb",
+      "name": "Tavily Extract",
+      "retryOnFail": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "wntc4OvNnpqXlZIE",
+          "name": "Bearer Auth tavily"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        272,
+        112
+      ],
+      "id": "21622f8b-0327-40b6-bdfb-bb35e33e7076",
+      "name": "Split Out2"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -672,
+        240
+      ],
+      "id": "313c1b06-dca0-4067-b097-add13cc565a0",
+      "name": "Schedule Trigger3"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "url"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        736,
+        144
+      ],
+      "id": "5ed49c9c-0c66-404a-9f67-98e39252b1f7",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        288,
+        480
+      ],
+      "id": "2b57e35f-88b2-4151-9441-0e0e7636a66b",
+      "name": "Split Out4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e09526ef-45ed-494a-a21b-ad13d0e6986f",
+              "name": "output",
+              "value": "={{ $json.output.replace(/<think>[\\s\\S]*?<\\/think>\\s*/g, '').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        880
+      ],
+      "id": "0c747d37-dd69-4468-a8d8-5caf6d5167b1",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"{{ $json.topic }}\",\n  \"search_depth\": \"advanced\",\n  \"time_range\": \"week\", \n  \"max_results\": 5,\n  \"topic\": \"news\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        64,
+        112
+      ],
+      "id": "7640625c-5808-4c9d-adc5-fa65b0b40480",
+      "name": "Tavily Search1",
+      "retryOnFail": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "wntc4OvNnpqXlZIE",
+          "name": "Bearer Auth tavily"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3207e7e1-2420-46fd-adbb-5d32b6850975",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": 0.7,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        112
+      ],
+      "id": "72bdf599-dc40-4fdd-a48c-796bdc9360a7",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "openai/gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        1072
+      ],
+      "id": "234fd64e-c1d2-4938-8fe6-d1874eabd338",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Sq1IsT84DnBWSrzD",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Поиск ссылок по запросу",
+        "height": 272,
+        "width": 224
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a9c0a947-16f1-4215-81e6-b309a122446c",
+      "name": "Sticky Note31"
+    },
+    {
+      "parameters": {
+        "content": "## Фильтрация релевантных источников",
+        "height": 272,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        416,
+        -16
+      ],
+      "id": "c337e5d6-4765-4bf5-b6e0-79dc2b82f286",
+      "name": "Sticky Note32"
+    },
+    {
+      "parameters": {
+        "content": "## Получение данных из релевантных источников",
+        "height": 304,
+        "width": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16,
+        336
+      ],
+      "id": "5c10ee7c-e550-4a07-92dd-bd7679c19fb9",
+      "name": "Sticky Note33"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "raw_content",
+              "separateBy": "other",
+              "customSeparator": "/n/n NEXT ARTICLE: /n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        480
+      ],
+      "id": "aadb1822-064e-4594-ad49-2073b404326f",
+      "name": "Concatenate Content"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Проанализируй полученные данные и структурируй их в понятный отчет о трендах.\n\nПример результата:\n\n📊 **ЕЖЕНЕДЕЛЬНЫЙ ОТЧЕТ ПО ТРЕНДАМ**\n📅 [дата] - [дата]\n\n🔥 **ТОП-5 ТРЕНДОВ НЕДЕЛИ:**\n\n1️⃣ **[Тренд]** (Популярность: [X]/10)\n📈 Ключевые события: [события]\n🔮 Прогноз: [прогноз]\n\n[повторить для всех трендов]\n\n🎯 **ГЛАВНЫЙ ТРЕНД НЕДЕЛИ:** [самый популярный тренд]",
+        "options": {
+          "systemMessage": "Ты исследователь трендов, анализируешь популярные темы и создаешь еженедельные отчеты. ",
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        48,
+        880
+      ],
+      "id": "3065e5a3-07e4-4d44-bc1e-3223177c7cdb",
+      "name": "AI Review Generator"
+    },
+    {
+      "parameters": {
+        "fromEmail": "yandex@yandex.ru",
+        "toEmail": "yandex@yandex.ru",
+        "subject": "Исследователь трендов: отчет",
+        "emailFormat": "=text",
+        "text": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        736,
+        880
+      ],
+      "id": "b96ffa5d-588a-4132-ae5a-c5077ca4ac59",
+      "name": "Send email",
+      "webhookId": "74252241-2820-4eb3-af13-7a6640167d50",
+      "credentials": {
+        "smtp": {
+          "id": "4va5EMF8Dh4J4yGU",
+          "name": "SMTP yandex account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"title\": \"Trends Analysis Schema\",\n  \"type\": \"array\",\n  \"description\": \"Список анализов трендов\",\n  \"items\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"trend_name\": {\n        \"type\": \"string\",\n        \"description\": \"Название тренда или технологии\",\n        \"minLength\": 1,\n        \"maxLength\": 100\n      },\n      \"popularity_score\": {\n        \"type\": \"integer\",\n        \"description\": \"Оценка популярности от 1 до 10\",\n        \"minimum\": 1,\n        \"maximum\": 10\n      },\n      \"key_developments\": {\n        \"type\": \"array\",\n        \"description\": \"Список ключевых событий или разработок\",\n        \"items\": {\n          \"type\": \"string\",\n          \"minLength\": 5,\n          \"maxLength\": 200\n        },\n        \"minItems\": 1,\n        \"maxItems\": 5\n      },\n      \"impact_assessment\": {\n        \"type\": \"string\",\n        \"description\": \"Оценка потенциального влияния\",\n        \"enum\": [\"low\", \"medium\", \"high\"]\n      },\n      \"future_predictions\": {\n        \"type\": \"string\",\n        \"description\": \"Прогноз развития на русском языке\",\n        \"minLength\": 20,\n        \"maxLength\": 300\n      }\n    },\n    \"required\": [\n      \"trend_name\",\n      \"popularity_score\", \n      \"key_developments\",\n      \"impact_assessment\",\n      \"future_predictions\"\n    ],\n    \"additionalProperties\": false\n  },\n  \"minItems\": 1,\n  \"maxItems\": 10\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        272,
+        1104
+      ],
+      "id": "019c9c7c-0272-4d93-b0ff-bb99d87d61c0",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        16
+      ],
+      "id": "3a1ae006-e87b-46d8-967b-2631b8598754",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"topic\": \"artificial intelligence trends 2026\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        160
+      ],
+      "id": "b796339e-4229-40bb-bc59-320da3c3c671",
+      "name": "Set topics"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Tavily Extract": {
+      "main": [
+        [
+          {
+            "node": "Split Out4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out2": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger3": {
+      "main": [
+        [
+          {
+            "node": "Set topics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Tavily Extract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out4": {
+      "main": [
+        [
+          {
+            "node": "Concatenate Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily Search1": {
+      "main": [
+        [
+          {
+            "node": "Split Out2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Review Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Concatenate Content": {
+      "main": [
+        [
+          {
+            "node": "AI Review Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Review Generator": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        []
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set topics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email": {
+      "main": [
+        []
+      ]
+    },
+    "Set topics": {
+      "main": [
+        [
+          {
+            "node": "Tavily Search1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "0b041c84-fa14-4dbe-8369-7d948ac2fe60",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fee8fac1522fe9eb9d97ce08bfa5fb821ff024049da64094aaefb0dadf7831ab"
+  },
+  "id": "Zlt76FJT09ekxFnVg7fU9",
+  "tags": []
+}

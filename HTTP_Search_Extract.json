@@ -1,0 +1,588 @@
+{
+  "name": "HTTP_Lesson_Search_Extract",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# Search + Extract",
+        "height": 80,
+        "width": 352,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1328,
+        -48
+      ],
+      "id": "443bda11-05f3-4fb5-a83c-635f1b112608",
+      "name": "Sticky Note27"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/extract",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"urls\": {{ $json.url.toJsonString() }},\n  \"extract_depth\": \"advanced\"\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -576,
+        304
+      ],
+      "id": "8253316a-957d-4194-a56a-85a07ef0d65f",
+      "name": "Tavily Extract",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "H1CXBM6rxcfdMhPx",
+          "name": "Bearer Auth Tavily"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        -64
+      ],
+      "id": "a6ca571c-795a-459d-a8e4-c3fac06a7fef",
+      "name": "Split Out2"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -832,
+        -64
+      ],
+      "id": "6ab92868-dc59-46c8-97d8-3493f2849e09",
+      "name": "Schedule Trigger3"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "url"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        48,
+        -64
+      ],
+      "id": "b4a44567-2f75-4fdf-9f99-b404f1ff7fd7",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        304
+      ],
+      "id": "5d55c1b1-7b4c-4492-a7c8-e867acbb1532",
+      "name": "Split Out4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e09526ef-45ed-494a-a21b-ad13d0e6986f",
+              "name": "output",
+              "value": "={{ $json.output.replace(/<think>[\\s\\S]*?<\\/think>\\s*/g, '').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        704
+      ],
+      "id": "ddf1c3ce-57c4-41e9-93a5-aedf9d8f95bd",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"российская экономика ключевые новости сегодня\",\n  \"topic\": \"general\",\n  \"search_depth\": \"advanced\",\n  \"start_date\":{{ $now.minus({ days: 1 }).toFormat('yyyy-MM-dd').toJsonString() }},\n  \"end_date\": {{ $now.format('yyyy-MM-dd').toJsonString() }},\n  \"chunks_per_source\": 5,\n  \"include_domains\": [\n    \"rbc.ru\",\n    \"vedomosti.ru\",\n    \"kommersant.ru\",\n    \"interfax.ru\",\n    \"cbr.ru\",\n    \"moex.com\",\n    \"investing.com\",\n    \"smart-lab.ru\"\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -576,
+        -64
+      ],
+      "id": "82aed4ae-539e-4ad6-9342-294383095e6f",
+      "name": "Tavily Search1",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "H1CXBM6rxcfdMhPx",
+          "name": "Bearer Auth Tavily"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3207e7e1-2420-46fd-adbb-5d32b6850975",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": 0.7,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -176,
+        -64
+      ],
+      "id": "7a2417f2-384b-4c4a-ba39-2bb72862e4c3",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini-2024-07-18",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini-2024-07-18"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -608,
+        896
+      ],
+      "id": "ed5e8489-35e7-4d77-8f7d-9f8ca950c9f8",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Q1Va3yDyiMqLcFgV",
+          "name": "OpenAI Aleron"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Поиск ссылок по запросу",
+        "height": 272,
+        "width": 224
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        -176
+      ],
+      "id": "99facff4-d99b-4eb2-b056-6bc874171eca",
+      "name": "Sticky Note31"
+    },
+    {
+      "parameters": {
+        "content": "## Фильтрация релевантных источников",
+        "height": 272,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -176
+      ],
+      "id": "461b00a4-280c-4627-9dd4-4ca8aa9f19cf",
+      "name": "Sticky Note32"
+    },
+    {
+      "parameters": {
+        "content": "## Получение данных из релевантных источников",
+        "height": 304,
+        "width": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        160
+      ],
+      "id": "5298119d-b5b2-4487-93b6-d2d37ac3c1cd",
+      "name": "Sticky Note33"
+    },
+    {
+      "parameters": {
+        "content": "## Генерация экономической сводки на основе найденных новостей",
+        "height": 448,
+        "width": 368
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        560
+      ],
+      "id": "021b0d6e-f9b3-41df-b834-cef3a16460fd",
+      "name": "Sticky Note40"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "raw_content",
+              "separateBy": "other",
+              "customSeparator": "/n/n NEXT ARTICLE: /n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        304
+      ],
+      "id": "2ac5f6af-7478-41eb-b7bb-885efcf40f19",
+      "name": "Concatenate Content"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Проанализируй российские экономические новости.\nНовости получены сегодня (UTC): {{ $now.toUTC().toISO() }}  \nНОВОСТИ,ПОЛУЧЕННЫЕ ИЗ ИНТЕРНЕТА:\n{{ $json.concatenated_raw_content }}\n\nОриентируйся строго на НОВОСТИ,ПОЛУЧЕННЫЕ ИЗ ИНТЕРНЕТА, которые я передал тебе выше.\nБудь внимателен к датам, анализируй контент новостей корректно относительно сегодняшней даты - сегодня {{ $now.toUTC().toISO() }}. Если приводишь в своей сводке события, то обязательно указывай, дату данного события.\n\nСоздай краткий дайджест:\n1. Решения ЦБ и регуляторов\n2. Динамика рубля и сырьевых цен\n3. Корпоративные новости\n4. Новости рынка Ценных бумаг\n5. Влияние на российский бизнес\n\nНа основании всех приведенных данных, предоставь краткие выводы, прогнозы и рекомендации по стратегии инвестирования: куда сейчас лучше всего инвестировать, от чего воздержаться, чего опасаться, какие возможности открываются для получения дохода.\nТвои выводы и рекомендации должны быть конкретными, полезными, ясными и основанными на полученной из НОВОСТЕЙ информации.\n\nПример результата:\n\n📊 РОССИЙСКАЯ ЭКОНОМИКА | 15-22 августа 2025\n\n\n🏦 РЕШЕНИЯ РЕГУЛЯТОРОВ:\n...\n\n💱 ВАЛЮТА И СЫРЬЕ:\n...\n\n🏢 КОРПОРАТИВНЫЕ НОВОСТИ:\n...\n\n💼 НОВОСТИ РЫНКА ЦЕННЫХ БУМАГ НА БИЗНЕС:\n...\n\n💼 ВЛИЯНИЕ НА БИЗНЕС:\n...\n\nВЫВОДЫ, РЕКОМЕНДАЦИИ И ПРОГНОЗЫ:\n",
+        "options": {
+          "systemMessage": "Ты известный экономический аналитик, который анализирует новости из открытых источников и предоставляет полезные советы, рекомендации, выводы. \nТы помогаешь увидеть дополнительные возможности, которые открываются для получения дохода = это твоя основная задача. Каждую новость ты должен интепретировать с точки зрения того, как ей воспользоваться: как себя обезопасить от потерь либо как получить дополнительный доход - это твой главный фокус.",
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        -592,
+        704
+      ],
+      "id": "358305d3-5c73-4641-8ce5-7d33b0272697",
+      "name": "AI Review Generator"
+    },
+    {
+      "parameters": {
+        "resource": "block",
+        "blockId": {
+          "__rl": true,
+          "value": "https://www.notion.so/Economic-Review-20d3ee61abad80c0b46ad690bc7a6786?source=copy_link#2513ee61abad806e80d9e00e85d6f347",
+          "mode": "url"
+        },
+        "blockUi": {
+          "blockValues": [
+            {
+              "textContent": "={{ $json.part }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        704
+      ],
+      "id": "4cf7ba50-f2e3-4200-8b39-6d8eba8529eb",
+      "name": "Append a block",
+      "credentials": {
+        "notionApi": {
+          "id": "oFGVdcCsi1yRzbI1",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Вход: { \"output\": \"тут ваш текст...\" }\n\nreturn items.map(item => {\n  const text = item.json.output || \"\";\n  const parts = text.split(\"\\n\\n\"); // делим по \\n\\n\n\n  return parts.map(p => ({ json: { part: p } }));\n}).flat();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        704
+      ],
+      "id": "cb3254a3-1fc5-4675-b732-30472c4bcfe9",
+      "name": "Code"
+    }
+  ],
+  "pinData": {
+    "Tavily Extract": [
+      {
+        "json": {
+          "results": [
+            {
+              "url": "https://www.rbc.ru/tags/?tag=%D1%8D%D0%BA%D0%BE%D0%BD%D0%BE%D0%BC%D0%B8%D0%BA%D0%B0%20%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D0%B8",
+              "raw_content": "[Перейти к основному контенту](#maincontent)\n\n\n[rbc.group](https://rbc.group/advertisers/)\n\nВсе материалы с тегом «\n\n# экономика России\n\n»\n\nВсе рубрики\n\nВсе рубрики\n\nАвто\n\nБаза знаний\n\nБизнес\n\nНедвижимость\n\nНовая экономика\n\nОбщество\n\nПолитика\n\nСвое дело\n\nСпецпроекты\n\nСпорт\n\nТехнологии и медиа\n\nФинансы\n\nЭкономика\n\nСовпадений не найдено\n\nВсе материалы\n\nВсе материалы\n\nВидео\n\nВидеогалереи\n\nСпецпроекты\n\nПерсоны\n\nИнтервью\n\nИсследования\n\nМнения\n\nФоторепортажи\n\nИнфографика\n\nНовости\n\nОнлайны\n\nРасследования\n\nРейтинги\n\nСтатьи\n\nСюжеты\n\nСовпадений не найдено\n\nЗа все время\n\n[За сутки](#)\n[За неделю](#)\n[За месяц](#)\n[За все время](#)\n\n[За все время](&time=all)\n\n[Сегодня](&time=today)\n\n[Вчера](&time=yesterday)\n\n[За неделю](&time=week)\n\n[За месяц](&time=month)\n\nРБК,\nЭкономика, 13 авг, 19:53\n\n[Росстат сообщил о замедлении роста российской экономики\n\nРост российского ВВП замедлился на 0,3 п.п. за квартал. В ЦСР отмечают, что на это повлияла жесткая денежно-кредитная политика Центробанка, и рассчитывают на улучшение динамики после снижения ставки](https://www.rbc.ru/economics/13/08/2025/689cbb6f9a7947396a1ea3a7)\n\nРБК,\nЭкономика, 18 июл, 09:42\n\n[Эксперты ЦМАКП предложили заморозить цены на мясо, яйца и картофель](https://www.rbc.ru/rbcfreenews/6879e4bb9a794723ae8b200b)\n\nРБК,\nЭкономика, 17 июл, 18:55\n\n[Bloomberg написал о «долгожданной победе России» над инфляцией](https://www.rbc.ru/rbcfreenews/687916f49a794719c01f9abf)\n\nРБК,\nЭкономика, 16 июл, 11:10\n\n[Россия сохранила четвертое место среди крупнейших экономик мира](https://www.rbc.ru/economics/16/07/2025/6877571c9a794755899104e1)\n\nРБК,\nЭкономика, 14 июл, 19:28\n\n[Трамп назвал «невероятным» потенциал России в торговле](https://www.rbc.ru/rbcfreenews/68752e5a9a794719dacc0de5)\n\nРБК,\nЭкономика, 02 июл, 17:54\n\n[Набиуллина предупредила о грядущих «неспокойных временах»](https://www.rbc.ru/rbcfreenews/686544d79a794709e45e4543)\n\nРБК,\nЭкономика, 02 июл, 14:30\n\n[Греф увидел в экономике России много признаков резкого торможения\n\nПо словам главы Сбербанка, экономику России сейчас тормозит «целый набор факторов», среди которых «самым ключевым» является высокий уровень ключевой ставки ЦБ.](https://www.rbc.ru/economics/02/07/2025/686514a99a7947bacb925f6d)\n\nРБК,\nПолитика, 27 июн, 18:06\n\n[Путин на прогнозы обвала экономики ответил словами «сами скоро сдохнут»](https://www.rbc.ru/rbcfreenews/685eb3109a7947ca8d16f8b5)\n\nРБК,\nЭкономика, 26 июн, 20:32\n\n[Силуанов объяснил, что происходит с экономикой России вместо рецессии\n\nВ российской экономике происходит «плановое охлаждение», осуществляемое ЦБ, это не рецессия, заявил министр финансов. Скоро Россия начнет выходить из низких темпов экономического развития, заверил он](https://www.rbc.ru/economics/26/06/2025/685d7b069a7947684f9a1579)\n\nРБК,\nБизнес, 26 июн, 10:39\n\n[Вместо торговли: чем сегодня занялись предприниматели](https://www.rbc.ru/opinions/business/26/06/2025/685c57989a79475aed1b1f05)\n\nРБК,\nЭкономика, 20 июн, 10:05\n\n[Новак призвал не упустить момент для «нагрева экономики»\n\nИндикаторы инфляции показывают, что нужно снижать ставку и переходить от управляемого охлаждения к нагреву экономики, важно не пропустить этот момент, считает Новак. В июне ЦБ снизил ставку до 20% впервые с осени 2022 года](https://www.rbc.ru/economics/20/06/2025/6854fe179a7947d2d7b89bf6)\n\nРБК,\nБизнес, 19 июн, 20:31\n\n[Глава «Сибура» согласился с оценкой Минфина российской экономики\n\nГлава «Сибура» Михаил Карисалов заявил, что компания продолжает инвестировать и реализовывать проекты, несмотря на «охлаждение» в экономике. О выходе России на грань рецессии заявил на ПМЭФ глава Минэкономразвития](https://www.rbc.ru/business/19/06/2025/685435ae9a79472c6375be8c)\n\nРБК,\nЭкономика, 19 июн, 13:28\n\n[«Мы на грани рецессии». О чем говорили Набиуллина, Решетников и Силуанов\n\nЛюбовь к экономике, риски рецессии, охлаждение или похолодание и музыка вместо ключевой ставки — главные заявления чиновников финансово-экономического блока на Петербургском международном экономическом форуме (ПМЭФ-2025)](https://www.rbc.ru/economics/19/06/2025/6853c9879a794721812a6f1c)\n\nРБК,\nПолитика, 19 июн, 12:42\n\n[Кремль анонсировал объемное выступление Путина на ПМЭФ-2025](https://www.rbc.ru/rbcfreenews/6853da2c9a7947352f934124)\n\nРБК,\nЭкономика, 19 июн, 11:34\n\n[«За похолоданием всегда приходит лето»: Силуанов о ситуации в экономике](https://www.rbc.ru/economics/19/06/2025/6853bc6d9a79473119231a44)\n\nРБК,\nЭкономика, 19 июн, 08:31\n\n[Бизнесмены и экономисты поспорили о переохлаждении российской экономики\n\nНаступило ли переохлаждение российской экономики? Опрошенные РБК участники XXVIII Петербургского международного экономического форума дали свою оценку того, что с ней происходит](https://www.rbc.ru/economics/19/06/2025/6849b35f9a7947503674c94d)\n\nРБК,\nПолитика, 18 июн, 16:34\n\n[Первым мероприятием Путина на ПМЭФ стало совещание по развитию экономики](https://www.rbc.ru/rbcfreenews/6852bf039a7947393dd45988)\n\nРБК,\nЭкономика, 18 июн, 01:00\n\n[Евтушенков заявил о деглобализации и «строительстве нового мира»\n\nЕвтушенков назвал текущий период «периодом осмысления» и деглобализации. Из-за того, что строительство нового мира идет каждый день, в мире нет человека, который мог бы знать, как все будет, уверен он](https://www.rbc.ru/economics/18/06/2025/68516d0f9a79478d4d21e449)\n\nРБК,\nЭкономика, 16 июн, 09:31\n\n[Орешкин заявил, что модель роста экономики России себя исчерпала\n\nТекущая модель роста экономики России себя исчерпала, для дальнейшего развития нужен шаг вверх — на следующую технологическую ступень, считает Орешкин](https://www.rbc.ru/economics/16/06/2025/684fb5b99a7947752151fcf0)\n\nРБК,\nЭкономика, 26 мая, 17:24\n\n[Путин поставил в заслугу бизнесу 4-е место России среди экономик мира](https://www.rbc.ru/rbcfreenews/683475749a79477149f0ab23)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\nПрямой эфир\n\nОшибка воспроизведения видео. Пожалуйста, обновите ваш браузер.\n\n[Мать и дитя\n₽1 400\n\n(+13,42%)\n\nпрогноз ИБ Синара\nк 12.08.26](https://www.rbc.ru/quote/ticker/305272?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/305272?utm_source=rbc_main&utm_medium=funds)\n\n[Яндекс\n₽6 000\n\n(+40,38%)\n\nпрогноз КИТ Финанс\nк 31.07.26](https://www.rbc.ru/quote/ticker/69684?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/69684?utm_source=rbc_main&utm_medium=funds)\n\n[«ФосАгро»\n₽7 100\n\n(+1,43%)\n\nпрогноз Freedom Finance\nк 07.08.26](https://www.rbc.ru/quote/ticker/59399?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/59399?utm_source=rbc_main&utm_medium=funds)\n\n[Ozon\n₽5 400\n\n(+21,4%)\n\nпрогноз ИБ Синара\nк 07.08.26](https://www.rbc.ru/quote/ticker/305273?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/305273?utm_source=rbc_main&utm_medium=funds)\n\n[ГК «Самолет»\n₽2 310\n\n(+85,99%)\n\nпрогноз ПСБ\nк 11.08.26](https://www.rbc.ru/quote/ticker/305279?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/305279?utm_source=rbc_main&utm_medium=funds)\n\n[Мать и дитя\n₽1 400\n\n(+13,42%)\n\nпрогноз ИБ Синара\nк 12.08.26](https://www.rbc.ru/quote/ticker/305272?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/305272?utm_source=rbc_main&utm_medium=funds)\n\n[Яндекс\n₽6 000\n\n(+40,38%)\n\nпрогноз КИТ Финанс\nк 31.07.26](https://www.rbc.ru/quote/ticker/69684?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/69684?utm_source=rbc_main&utm_medium=funds)\n\n[«ФосАгро»\n₽7 100\n\n(+1,43%)\n\nпрогноз Freedom Finance\nк 07.08.26](https://www.rbc.ru/quote/ticker/59399?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/59399?utm_source=rbc_main&utm_medium=funds)\n\n[Ozon\n₽5 400\n\n(+21,4%)\n\nпрогноз ИБ Синара\nк 07.08.26](https://www.rbc.ru/quote/ticker/305273?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/305273?utm_source=rbc_main&utm_medium=funds)\n\n[ГК «Самолет»\n₽2 310\n\n(+85,99%)\n\nпрогноз ПСБ\nк 11.08.26](https://www.rbc.ru/quote/ticker/305279?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/305279?utm_source=rbc_main&utm_medium=funds)\n\nЛента новостей\n\n[Над Украиной заметили метеорит\nОбщество, 23:11](https://www.rbc.ru/rbcfreenews/689e40009a7947a83c2c333e?from=newsfeed)\n[Силы ПВО уничтожили 13 дронов за три часа над тремя регионами России\nПолитика, 22:50](https://www.rbc.ru/rbcfreenews/689e3b359a79471b6275ead7?from=newsfeed)\n[Ереван заявил о сносе памятников советским ветеранам в Карабахе\nПолитика, 22:44](https://www.rbc.ru/politics/14/08/2025/689e32259a7947050bf244df?from=newsfeed)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[В Волгоградской области жестоко убили федерального судью\nОбщество, 22:16](https://www.rbc.ru/rbcfreenews/689e31e69a79472da9eb421a?from=newsfeed)\n[Трамп допустил участие европейцев во встрече с Путиным и Зеленским\nПолитика, 22:00](https://www.rbc.ru/rbcfreenews/689e2d479a7947e298adf6d3?from=newsfeed)\n[Пожарные ликвидировали возгорание на НПЗ в Волгограде\nПолитика, 21:54](https://www.rbc.ru/rbcfreenews/689e2ca79a7947922b4da05d?from=newsfeed)\n[Трамп допустил ослабление НАТО в Европе ради урегулирования на Украине\nПолитика, 21:47](https://www.rbc.ru/politics/14/08/2025/689e2d259a7947621177e946?from=newsfeed)\n[ИИ для работы и жизни — новый интенсив РБК\n\nКак пользоваться нейросетями и прокачать с ними общение\n\nПодробнее](https://pro.rbc.ru/intensive/rbcpro_AI_for_life?utm_source=rbc.ru&utm_medium=inhouse_media&utm_campaign=rbcpro_AI_for_life&utm_term=banners_newsfeed)\n[Гол со штрафного принес «Пари НН» первую победу в сезоне\nСпорт, 21:34](https://www.rbc.ru/sport/14/08/2025/689e1eb19a794718c4abcad0?from=newsfeed)\n[Вандал забросал кирпичами собор в Анкоридже, где пройдет саммит с Путиным\nПолитика, 21:31](https://www.rbc.ru/rbcfreenews/689e27d49a7947d8149ccf43?from=newsfeed)\n[Трамп назвал встречу, которая будет важнее переговоров с Путиным\nПолитика, 21:17](https://www.rbc.ru/politics/14/08/2025/689e26ab9a7947069d38d685?from=newsfeed)\n[Соболенко отказалась выступать без Димитрова в миксте на US Open\nСпорт, 21:12](https://www.rbc.ru/sport/14/08/2025/689e1f9c9a794718c4abcadd?from=newsfeed)\n[Военная операция на Украине. Онлайн\nПолитика, 21:09](https://www.rbc.ru/textonlines/18/04/2024/6216fb4d9a79474dc80e8821?from=newsfeed)\n[В Дагестане объявили опасность атаки БПЛА\nПолитика, 21:04](https://www.rbc.ru/rbcfreenews/689e24369a794780feaa4248?from=newsfeed)\n[Нетаньяху назвал пять принципов для победы Израиля в Газе\nПолитика, 20:54](https://www.rbc.ru/politics/14/08/2025/689e1c429a794783578cd757?from=newsfeed)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\nВаш браузер настроен на блокировку уведомлений\n\nОн не дает сайту rbc.ru корректно работать. Если вы хотите быть в курсе всех событий, удалите сайт rbc.ru из списка заблокированных.\n\n[Как это сделать](/pushmanual?from=rbc.ru)\n\n[Не сейчас](#)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)",
+              "images": []
+            },
+            {
+              "url": "https://tv.rbc.ru/tags/%D1%8D%D0%BA%D0%BE%D0%BD%D0%BE%D0%BC%D0%B8%D0%BA%D0%B0%20%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D0%B8",
+              "raw_content": "[Видео](/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[Видео](/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[Видео](/) /\n\nэкономика России\n\n# экономика России\n\nВсе выпуски российских и зарубежных новостей экономики, бизнеса и политики;\nаналитические программы на самые актуальные темы с ведущими представителями бизнеса и власти;\nразвлекательные программы в выходные дни: о спорте, автомобилях, туризме и образе жизни,\nо том, что сегодня мы называем business entertainment.\n\n[24:36](https://tv.rbc.ru/archive/dalshe/66e85e812ae5961b54ad0ee8)\n\n[Что дальше? 13.09.2024 - ПРОГНОЗ БЕЗ ГРЁЗ](https://tv.rbc.ru/archive/dalshe/66e85e812ae5961b54ad0ee8)\n\n[Что дальше?](https://tv.rbc.ru/archive/dalshe)\n·\n[13 сен 2024, 16:20](https://tv.rbc.ru/archive/dalshe/66e85e812ae5961b54ad0ee8)\n\n[19:43](https://tv.rbc.ru/archive/ekskluziv/6318898d2ae5961f4f00e0ca)\n\n[Максим Решетников о точках роста российской экономики и ее перестройке](https://tv.rbc.ru/archive/ekskluziv/6318898d2ae5961f4f00e0ca)\n\n[Эксклюзивное интервью](https://tv.rbc.ru/archive/ekskluziv)\n·\n[06 сен 2022, 13:36](https://tv.rbc.ru/archive/ekskluziv/6318898d2ae5961f4f00e0ca)\n\n[29:52](https://tv.rbc.ru/archive/den/62bd8d2f2ae5968d49de2c7d)\n\n[Почему Газпром отказался платить дивиденды? Мнение экспертов](https://tv.rbc.ru/archive/den/62bd8d2f2ae5968d49de2c7d)\n\n[ДЕНЬ](https://tv.rbc.ru/archive/den)\n·\n[30 июн 2022, 14:00](https://tv.rbc.ru/archive/den/62bd8d2f2ae5968d49de2c7d)\n\n[19:55](https://tv.rbc.ru/archive/den/62bc3fba2ae5968d49de2c52)\n\n[Стоит ли отказаться от долларов в России?](https://tv.rbc.ru/archive/den/62bc3fba2ae5968d49de2c52)\n\n[ДЕНЬ](https://tv.rbc.ru/archive/den)\n·\n[29 июн 2022, 14:33](https://tv.rbc.ru/archive/den/62bc3fba2ae5968d49de2c52)\n\n[7:57](https://tv.rbc.ru/archive/sut/62baa1672ae5961fc4671512)\n\n[ПФР и ФСС объединяют: нагрузка на работодателя вырастет, соцвыплаты тоже](https://tv.rbc.ru/archive/sut/62baa1672ae5961fc4671512)\n\n[Суть дела](https://tv.rbc.ru/archive/sut)\n·\n[28 июн 2022, 09:23](https://tv.rbc.ru/archive/sut/62baa1672ae5961fc4671512)\n\n[20:48](https://tv.rbc.ru/archive/pmef/62ace7022ae596662ee13106)\n\n[Андрей Костин о способах борьбы с санкциями и дедолларизации экономики РФ](https://tv.rbc.ru/archive/pmef/62ace7022ae596662ee13106)\n\n[ПМЭФ](https://tv.rbc.ru/archive/pmef)\n·\n[17 июн 2022, 23:08](https://tv.rbc.ru/archive/pmef/62ace7022ae596662ee13106)\n\n[15:52](https://tv.rbc.ru/archive/pmef/62accb922ae596662ee130f3)\n\n[Кудрин о перестройке бизнеса, сроках подготовки стратегии новой экономики](https://tv.rbc.ru/archive/pmef/62accb922ae596662ee130f3)\n\n[ПМЭФ](https://tv.rbc.ru/archive/pmef)\n·\n[17 июн 2022, 21:17](https://tv.rbc.ru/archive/pmef/62accb922ae596662ee130f3)\n\n[52:22](https://tv.rbc.ru/archive/chez/62acb64b2ae596662ee130e9)\n\n[ПМЭФ-2022: главные заявления Владимира Путина / Перспективы бизнеса в РФ](https://tv.rbc.ru/archive/chez/62acb64b2ae596662ee130e9)\n\n[ЧЭЗ](https://tv.rbc.ru/archive/chez)\n·\n[17 июн 2022, 18:55](https://tv.rbc.ru/archive/chez/62acb64b2ae596662ee130e9)\n\n[15:33](https://tv.rbc.ru/archive/pmef/62ac6e0e2ae596662ee130d9)\n\n[Александр Соколов о перестройке экономики и динамике проблемных активов](https://tv.rbc.ru/archive/pmef/62ac6e0e2ae596662ee130d9)\n\n[ПМЭФ](https://tv.rbc.ru/archive/pmef)\n·\n[17 июн 2022, 14:41](https://tv.rbc.ru/archive/pmef/62ac6e0e2ae596662ee130d9)\n\n[17:45](https://tv.rbc.ru/archive/pmef/62ac6aeb2ae596662ee130d8)\n\n[Шохин о раскрепощении предпринимательской активности и импортозамещении](https://tv.rbc.ru/archive/pmef/62ac6aeb2ae596662ee130d8)\n\n[ПМЭФ](https://tv.rbc.ru/archive/pmef)\n·\n[17 июн 2022, 14:22](https://tv.rbc.ru/archive/pmef/62ac6aeb2ae596662ee130d8)\n\n[14:29](https://tv.rbc.ru/archive/news/62ac56542ae596662ee130cc)\n\n[Франция без российского газа /Крушение Су-25 в Белгородской области /ПМЭФ](https://tv.rbc.ru/archive/news/62ac56542ae596662ee130cc)\n\n[Главные новости](https://tv.rbc.ru/archive/news)\n·\n[17 июн 2022, 13:00](https://tv.rbc.ru/archive/news/62ac56542ae596662ee130cc)\n\n[19:09](https://tv.rbc.ru/archive/pmef/62ac533b2ae596662ee130cb)\n\n[Антон Силуанов о выплате госдолга РФ и восстановлении отношений с Западом](https://tv.rbc.ru/archive/pmef/62ac533b2ae596662ee130cb)\n\n[ПМЭФ](https://tv.rbc.ru/archive/pmef)\n·\n[17 июн 2022, 12:39](https://tv.rbc.ru/archive/pmef/62ac533b2ae596662ee130cb)\n\n[14:15](https://tv.rbc.ru/archive/economics/62ac48092ae596662ee130c4)\n\n[Сценарий «труба на Восток»/Траты россиян выросли/Coca-Cola и Enel уходят](https://tv.rbc.ru/archive/economics/62ac48092ae596662ee130c4)\n\n[Экономика. Главное](https://tv.rbc.ru/archive/economics)\n·\n[17 июн 2022, 12:00](https://tv.rbc.ru/archive/economics/62ac48092ae596662ee130c4)\n\n[31:30](https://tv.rbc.ru/archive/pmef/62aadf452ae596c27f8af4c7)\n\n[Трансляция, ч.3. Российская экономика: современные вызовы и точки опоры](https://tv.rbc.ru/archive/pmef/62aadf452ae596c27f8af4c7)\n\n[ПМЭФ](https://tv.rbc.ru/archive/pmef)\n·\n[16 июн 2022, 09:56](https://tv.rbc.ru/archive/pmef/62aadf452ae596c27f8af4c7)\n\n[21:26](https://tv.rbc.ru/archive/pmef/62aad6582ae596c27f8af4c6)\n\n[Трансляция, ч.2. Российская экономика: современные вызовы и точки опоры](https://tv.rbc.ru/archive/pmef/62aad6582ae596c27f8af4c6)\n\n[ПМЭФ](https://tv.rbc.ru/archive/pmef)\n·\n[16 июн 2022, 09:32](https://tv.rbc.ru/archive/pmef/62aad6582ae596c27f8af4c6)\n\n[24:56](https://tv.rbc.ru/archive/news/62a9b7392ae596c27f8af496)\n\n[НАТО: новое оружие Украине/США о действиях Украины/Китай и Египет на ПМЭФ](https://tv.rbc.ru/archive/news/62a9b7392ae596c27f8af496)\n\n[Главные новости](https://tv.rbc.ru/archive/news)\n·\n[15 июн 2022, 13:00](https://tv.rbc.ru/archive/news/62a9b7392ae596c27f8af496)\n\n[50:11](https://tv.rbc.ru/archive/den/62a990782ae596c27f8af48d)\n\n[Экономическая модель РФ / Экспорт российских энергоресурсов / Армия Китая](https://tv.rbc.ru/archive/den/62a990782ae596c27f8af48d)\n\n[ДЕНЬ](https://tv.rbc.ru/archive/den)\n·\n[15 июн 2022, 09:40](https://tv.rbc.ru/archive/den/62a990782ae596c27f8af48d)\n\n[24:35](https://tv.rbc.ru/archive/chez/62a623882ae596c27f8af438)\n\n[День России / Образ будущего: что означает «островизация» России?](https://tv.rbc.ru/archive/chez/62a623882ae596c27f8af438)\n\n[ЧЭЗ](https://tv.rbc.ru/archive/chez)\n·\n[12 июн 2022, 19:56](https://tv.rbc.ru/archive/chez/62a623882ae596c27f8af438)\n\n[20:10](https://tv.rbc.ru/archive/den/62986eb42ae596448ac137e2)\n\n[Разрыв в уровне доходов: как воспринимается обществом и как его сократить](https://tv.rbc.ru/archive/den/62986eb42ae596448ac137e2)\n\n[ДЕНЬ](https://tv.rbc.ru/archive/den)\n·\n[02 июн 2022, 10:31](https://tv.rbc.ru/archive/den/62986eb42ae596448ac137e2)\n\n[20:00](https://tv.rbc.ru/archive/den/62971daa2ae596448ac137b2)\n\n[Отрицательные ставки по валютным депозитам для юрлиц: в чём смысл](https://tv.rbc.ru/archive/den/62971daa2ae596448ac137b2)\n\n[ДЕНЬ](https://tv.rbc.ru/archive/den)\n·\n[01 июн 2022, 10:33](https://tv.rbc.ru/archive/den/62971daa2ae596448ac137b2)\n\n[USD/RUB F\n\n15.08\n80,24\n\n+0,39](https://www.rbc.ru/quote/ticker/338247 \"USD/RUB F, 15.08\")\n[EUR/RUB F\n\n15.08\n94,11\n\n+1,04](https://www.rbc.ru/quote/ticker/338243 \"EUR/RUB F, 15.08\")\n[Бирж.\n\nCNY\n\n15.08\n11,10\n\n+0,05](https://www.rbc.ru/quote/ticker/59066 \"CNY, 15.08\")\n[ЦБ\n\nUSD\n\n16.08\n80,02\n\n+0,26](https://www.rbc.ru/quote/ticker/72413 \"USD, 16.08\")\n[EUR\n\n16.08\n93,71\n\n+0,65](https://www.rbc.ru/quote/ticker/72383 \"EUR, 16.08\")\n[CNY\n\n16.08\n11,11\n\n+0,01](https://www.rbc.ru/quote/ticker/72377 \"CNY, 16.08\")\n[Нал.\n\nUSD\n\n19:46\n82,33\n\n80,08](https://cash.rbc.ru/?currency=3 \"USD, 19:46\")\n[EUR\n\n19:46\n96,25\n\n93,45](https://cash.rbc.ru/?currency=2 \"EUR, 19:46\")\n[BTC/USD\n\n19:44\n117 900,00\n\n+380,00](https://www.rbc.ru/crypto/currency/btcusd \"BTC/USD, 19:44\")\n[Cocoa\n\n15.08\n679,90\n\n-0,09%](https://www.rbc.ru/quote/ticker/357441 \"Cocoa, 15.08\")\n[IMOEX\n\n15.08\n3 012,09\n\n+1,17%](https://www.rbc.ru/quote/ticker/61867 \"IMOEX, 15.08\")\n[RTSI\n\n15.08\n1 185,76\n\n+0,84%](https://www.rbc.ru/quote/ticker/32543 \"RTSI, 15.08\")\n[Brent\n\n15.08\n66,33\n\n+0,50%](https://www.rbc.ru/quote/ticker/181206 \"BR-11.21, 15.08\")\n[Platinum\n\n15.08\n1 344,10\n\n-0,95%](https://www.rbc.ru/quote/ticker/101040 \"Platinum, 15.08\")\n[Gold\n\n15.08\n3 339,70\n\n-0,05%](https://www.rbc.ru/quote/ticker/101039 \"Gold, 15.08\")\n[Silver\n\n15.08\n38,25\n\n-0,29%](https://www.rbc.ru/quote/ticker/101041 \"Silver, 15.08\")\n[MOEXBTC\n\n15.08\n118 863,88\n\n-2,39%](https://www.rbc.ru/quote/ticker/362214 \"MOEXBTC, 15.08\")\n[Aluminum\n\n15.08\n2 607,50\n\n-0,42%](https://www.rbc.ru/quote/ticker/357769 \"Aluminum, 15.08\")\n[Nickel\n\n15.08\n15 230,00\n\n+1,06%](https://www.rbc.ru/quote/ticker/357768 \"Nickel, 15.08\")\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)\n\nПрямой эфир\n\nОшибка воспроизведения видео. Пожалуйста, обновите ваш браузер.\n\n[Мать и дитя\n₽1 400\n\n(+13,42%)\n\nпрогноз ИБ Синара\nк 12.08.26](https://www.rbc.ru/quote/ticker/305272?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/305272?utm_source=rbc_main&utm_medium=funds)\n\n[Яндекс\n₽6 000\n\n(+40,38%)\n\nпрогноз КИТ Финанс\nк 31.07.26](https://www.rbc.ru/quote/ticker/69684?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/69684?utm_source=rbc_main&utm_medium=funds)\n\n[«ФосАгро»\n₽7 100\n\n(+1,43%)\n\nпрогноз Freedom Finance\nк 07.08.26](https://www.rbc.ru/quote/ticker/59399?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/59399?utm_source=rbc_main&utm_medium=funds)\n\n[Ozon\n₽5 400\n\n(+21,4%)\n\nпрогноз ИБ Синара\nк 07.08.26](https://www.rbc.ru/quote/ticker/305273?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/305273?utm_source=rbc_main&utm_medium=funds)\n\n[ГК «Самолет»\n₽2 310\n\n(+85,99%)\n\nпрогноз ПСБ\nк 11.08.26](https://www.rbc.ru/quote/ticker/305279?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/305279?utm_source=rbc_main&utm_medium=funds)\n\n[Мать и дитя\n₽1 400\n\n(+13,42%)\n\nпрогноз ИБ Синара\nк 12.08.26](https://www.rbc.ru/quote/ticker/305272?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/305272?utm_source=rbc_main&utm_medium=funds)\n\n[Яндекс\n₽6 000\n\n(+40,38%)\n\nпрогноз КИТ Финанс\nк 31.07.26](https://www.rbc.ru/quote/ticker/69684?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/69684?utm_source=rbc_main&utm_medium=funds)\n\n[«ФосАгро»\n₽7 100\n\n(+1,43%)\n\nпрогноз Freedom Finance\nк 07.08.26](https://www.rbc.ru/quote/ticker/59399?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/59399?utm_source=rbc_main&utm_medium=funds)\n\n[Ozon\n₽5 400\n\n(+21,4%)\n\nпрогноз ИБ Синара\nк 07.08.26](https://www.rbc.ru/quote/ticker/305273?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/305273?utm_source=rbc_main&utm_medium=funds)\n\n[ГК «Самолет»\n₽2 310\n\n(+85,99%)\n\nпрогноз ПСБ\nк 11.08.26](https://www.rbc.ru/quote/ticker/305279?utm_source=rbc_main)\n[Купить](https://www.rbc.ru/quote/ticker/305279?utm_source=rbc_main&utm_medium=funds)\n\nЛента новостей\n\n[Гол Соболева в меньшинстве спас «Зенит» от проигрыша «Спартаку»\nСпорт, 19:29](https://www.rbc.ru/sport/16/08/2025/68a0a23d9a794726d269f053?from=newsfeed)\n[Путин назвал визит на Аляску своевременным и полезным\nПолитика, 19:21](https://www.rbc.ru/rbcfreenews/68a0ad1c9a794758813df332?from=newsfeed)\n[Как устроены актуальные схемы мошенничества и сколько теряют россияне\nРБК и М.Видео, 19:15](https://editorial.rbc.ru/mvid25s-r-kausas-m?from=newsfeed)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[FT узнала о готовности Путина заморозить конфликт\nПолитика, 18:52](https://www.rbc.ru/politics/16/08/2025/68a0a05d9a79476ef26c94cf?from=newsfeed)\n[Гладков показал видео уничтожения украинского беспилотника над Белгородом\nПолитика, 18:46](https://www.rbc.ru/rbcfreenews/68a0a5909a7947beba3fdafb?from=newsfeed)\n[Путин заявил, что его разговор с Трампом приблизил к нужным решениям\nПолитика, 18:25](https://www.rbc.ru/politics/16/08/2025/68a0a27d9a7947a77bcf3ff3?from=newsfeed)\n[Пять стратегий инвестора в недвижимость: как устроены и какую выбрать\nРБК и ПИК, 18:12](https://editorial.rbc.ru/pik23-a21-pyast-m?from=newsfeed)\n[Туск заявил о начале решающей фазы «игры за будущее» Украины\nПолитика, 18:09](https://www.rbc.ru/rbcfreenews/68a099389a7947ccd3249493?from=newsfeed)\n[«Барселона» успела внести Рэшфорда в заявку к старту чемпионата\nСпорт, 17:56](https://www.rbc.ru/sport/16/08/2025/68a087be9a7947604034adc8?from=newsfeed)\n[Гладков сообщил о двух пострадавших при ударах БПЛА по магазину и машине\nПолитика, 17:42](https://www.rbc.ru/rbcfreenews/68a094bc9a794741a3476d1e?from=newsfeed)\n[WSJ узнала о готовности Трампа предоставить Украине гарантии безопасности\nПолитика, 17:37](https://www.rbc.ru/politics/16/08/2025/68a096e89a79477bd61d5ffb?from=newsfeed)\n[Дмитриев после саммита на Аляске назвал встречу с медведем хорошим знаком\nПолитика, 17:21](https://www.rbc.ru/rbcfreenews/68a08e559a7947139ab4208b?from=newsfeed)\n[NYT узнала о приглашении лидеров ЕС на встречу Трампа с Зеленским\nПолитика, 17:17](https://www.rbc.ru/politics/16/08/2025/68a092659a79470ced1c929e?from=newsfeed)\n[В Гонконге запустят «дронов-часовых» для исключения аварий других БПЛА\nТехнологии и медиа, 17:06](https://www.rbc.ru/technology_and_media/16/08/2025/68a081729a7947c9095c45c6?from=newsfeed)\n\n[rbc.group](https://rbc.group/advertisers/)\n\n[rbc.group](https://rbc.group/advertisers/)",
+              "images": []
+            }
+          ],
+          "failed_results": [],
+          "response_time": 0.01,
+          "request_id": "dbc5bdea-2975-4942-8c24-5895c23e13ad"
+        }
+      }
+    ],
+    "Tavily Search1": [
+      {
+        "json": {
+          "query": "российская экономика ключевые новости сегодня",
+          "follow_up_questions": null,
+          "answer": null,
+          "images": [],
+          "results": [
+            {
+              "url": "https://www.rbc.ru/tags/?tag=%D1%8D%D0%BA%D0%BE%D0%BD%D0%BE%D0%BC%D0%B8%D0%BA%D0%B0%20%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D0%B8",
+              "title": "экономика России — последние новости сегодня на РБК.Ру",
+              "content": "За все время\n\nЗа сутки\nЗа неделю\nЗа месяц\nЗа все время\n\nЗа все время\n\nСегодня\n\nВчера\n\nЗа неделю\n\nЗа месяц\n\nРБК,\nЭкономика, 13 авг, 19:53\n\nРосстат сообщил о замедлении роста российской экономики\n\nРост российского ВВП замедлился на 0,3 п.п. за квартал. В ЦСР отмечают, что на это повлияла жесткая денежно-кредитная политика Центробанка, и рассчитывают на улучшение динамики после снижения ставки\n\nРБК,\nЭкономика, 18 июл, 09:42\n\nЭксперты ЦМАКП предложили заморозить цены на мясо, яйца и картофель [...] РБК,\nЭкономика, 17 июл, 18:55\n\nBloomberg написал о «долгожданной победе России» над инфляцией\n\nРБК,\nЭкономика, 16 июл, 11:10\n\nРоссия сохранила четвертое место среди крупнейших экономик мира\n\nРБК,\nЭкономика, 14 июл, 19:28\n\nТрамп назвал «невероятным» потенциал России в торговле\n\nРБК,\nЭкономика, 02 июл, 17:54\n\nНабиуллина предупредила о грядущих «неспокойных временах»\n\nРБК,\nЭкономика, 02 июл, 14:30\n\nГреф увидел в экономике России много признаков резкого торможения [...] По словам главы Сбербанка, экономику России сейчас тормозит «целый набор факторов», среди которых «самым ключевым» является высокий уровень ключевой ставки ЦБ.\n\nРБК,\nПолитика, 27 июн, 18:06\n\nПутин на прогнозы обвала экономики ответил словами «сами скоро сдохнут»\n\nРБК,\nЭкономика, 26 июн, 20:32\n\nСилуанов объяснил, что происходит с экономикой России вместо рецессии [...] Любовь к экономике, риски рецессии, охлаждение или похолодание и музыка вместо ключевой ставки — главные заявления чиновников финансово-экономического блока на Петербургском международном экономическом форуме (ПМЭФ-2025)\n\nРБК,\nПолитика, 19 июн, 12:42\n\nКремль анонсировал объемное выступление Путина на ПМЭФ-2025\n\nРБК,\nЭкономика, 19 июн, 11:34\n\n«За похолоданием всегда приходит лето»: Силуанов о ситуации в экономике\n\nРБК,\nЭкономика, 19 июн, 08:31 [...] В российской экономике происходит «плановое охлаждение», осуществляемое ЦБ, это не рецессия, заявил министр финансов. Скоро Россия начнет выходить из низких темпов экономического развития, заверил он\n\nРБК,\nБизнес, 26 июн, 10:39\n\nВместо торговли: чем сегодня занялись предприниматели\n\nРБК,\nЭкономика, 20 июн, 10:05\n\nНовак призвал не упустить момент для «нагрева экономики»",
+              "score": 0.76512027,
+              "raw_content": null
+            },
+            {
+              "url": "https://tv.rbc.ru/tags/%D1%8D%D0%BA%D0%BE%D0%BD%D0%BE%D0%BC%D0%B8%D0%BA%D0%B0%20%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D0%B8",
+              "title": "экономика России - смотреть новые видео онлайн, последние ...",
+              "content": "Трансляция, ч.2. Российская экономика: современные вызовы и точки опоры\n\nПМЭФ\n·\n16 июн 2022, 09:32\n\n24:56\n\nНАТО: новое оружие Украине/США о действиях Украины/Китай и Египет на ПМЭФ\n\nГлавные новости\n·\n15 июн 2022, 13:00\n\n50:11\n\nЭкономическая модель РФ / Экспорт российских энергоресурсов / Армия Китая\n\nДЕНЬ\n·\n15 июн 2022, 09:40\n\n24:35\n\nДень России / Образ будущего: что означает «островизация» России?\n\nЧЭЗ\n·\n12 июн 2022, 19:56\n\n20:10 [...] Франция без российского газа /Крушение Су-25 в Белгородской области /ПМЭФ\n\nГлавные новости\n·\n17 июн 2022, 13:00\n\n19:09\n\nАнтон Силуанов о выплате госдолга РФ и восстановлении отношений с Западом\n\nПМЭФ\n·\n17 июн 2022, 12:39\n\n14:15\n\nСценарий «труба на Восток»/Траты россиян выросли/Coca-Cola и Enel уходят\n\nЭкономика. Главное\n·\n17 июн 2022, 12:00\n\n31:30\n\nТрансляция, ч.3. Российская экономика: современные вызовы и точки опоры\n\nПМЭФ\n·\n16 июн 2022, 09:56\n\n21:26 [...] Видео\n\nrbc.group\n\nВидео\n\nrbc.group\n\nВидео /\n\nэкономика России\n\n# экономика России\n\nВсе выпуски российских и зарубежных новостей экономики, бизнеса и политики;\nаналитические программы на самые актуальные темы с ведущими представителями бизнеса и власти;\nразвлекательные программы в выходные дни: о спорте, автомобилях, туризме и образе жизни,\nо том, что сегодня мы называем business entertainment.\n\n24:36\n\nЧто дальше? 13.09.2024 - ПРОГНОЗ БЕЗ ГРЁЗ\n\nЧто дальше?\n·\n13 сен 2024, 16:20\n\n19:43 [...] Максим Решетников о точках роста российской экономики и ее перестройке\n\nЭксклюзивное интервью\n·\n06 сен 2022, 13:36\n\n29:52\n\nПочему Газпром отказался платить дивиденды? Мнение экспертов\n\nДЕНЬ\n·\n30 июн 2022, 14:00\n\n19:55\n\nСтоит ли отказаться от долларов в России?\n\nДЕНЬ\n·\n29 июн 2022, 14:33\n\n7:57\n\nПФР и ФСС объединяют: нагрузка на работодателя вырастет, соцвыплаты тоже\n\nСуть дела\n·\n28 июн 2022, 09:23\n\n20:48\n\nАндрей Костин о способах борьбы с санкциями и дедолларизации экономики РФ [...] ПМЭФ\n·\n17 июн 2022, 23:08\n\n15:52\n\nКудрин о перестройке бизнеса, сроках подготовки стратегии новой экономики\n\nПМЭФ\n·\n17 июн 2022, 21:17\n\n52:22\n\nПМЭФ-2022: главные заявления Владимира Путина / Перспективы бизнеса в РФ\n\nЧЭЗ\n·\n17 июн 2022, 18:55\n\n15:33\n\nАлександр Соколов о перестройке экономики и динамике проблемных активов\n\nПМЭФ\n·\n17 июн 2022, 14:41\n\n17:45\n\nШохин о раскрепощении предпринимательской активности и импортозамещении\n\nПМЭФ\n·\n17 июн 2022, 14:22\n\n14:29",
+              "score": 0.7279179,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.rbc.ru/economics/",
+              "title": "Новости экономики в России и в мире сегодня на РБК",
+              "content": "Казахстан обогнал Россию по ВВП на душу населения\n\n19:13\n\nПравительство обнулило нормативы продажи валютной выручки\n\n16:06\n\nBloomberg назвал торговлю в рупиях целью визита делегации Индии в Россию\n\n13 авг, 22:25\n\nМЭА предупредило о дисбалансе спроса и предложения на рынке нефти\n\n13 авг, 19:53\n\nРосстат сообщил о замедлении роста российской экономики\n\n13 авг, 16:03\n\nBloomberg узнал о планах Лондона запустить масштабную ядерную программу\n\n13 авг, 13:13 [...] В Госдуме объяснили, как достичь безусловного базового дохода для россиян\n\n12 авг, 13:22\n\nВ АТОР рассказали, как отели в Турции могут обойти запрет all inclusive\n\n12 авг, 12:07\n\nПадение продаж красной икры в российской рознице превысило 20%\n\n11 авг, 21:32\n\nТрамп поставил Китаю новый дедлайн по пошлинам\n\n11 авг, 20:47\n\nТрамп отменил «удар» по золоту Швейцарии\n\n11 авг, 12:48\n\nРаботавшая в России ирландская PetroNeft будет добровольно ликвидирована\n\n11 авг, 09:25 [...] Как открыть кафе с нуля: пошаговая инструкция для начинающих в 2025 году\n\n13 авг, 09:14\n\nИз Петропавловска-Камчатского во Владивосток полетят льготные рейсы\n\n13 авг, 02:38\n\nГосдолг США достиг рекордной отметки в $37 трлн\n\n13 авг, 01:47\n\nВ Индии рассказали о защите от рисков для рынка нефти из-за пошлин Трампа\n\n12 авг, 18:40\n\nБиржевая цена бензина АИ-95 обновила ценовой рекорд\n\n12 авг, 17:31\n\nПутин рассказал об оценках экспертов насчет рисков рецессии\n\n12 авг, 15:47 [...] Подробнее\nГол со штрафного принес «Пари НН» первую победу в сезоне\nСпорт, 21:34\nВандал забросал кирпичами собор в Анкоридже, где пройдет саммит с Путиным\nПолитика, 21:31\nТрамп назвал встречу, которая будет важнее переговоров с Путиным\nПолитика, 21:17\nСоболенко отказалась выступать без Димитрова в миксте на US Open\nСпорт, 21:12\nВоенная операция на Украине. Онлайн\nПолитика, 21:09\nВ Дагестане объявили опасность атаки БПЛА\nПолитика, 21:04\nНетаньяху назвал пять принципов для победы Израиля в Газе [...] 79,85\n\n-0,02\nEUR/RUB F\n\n93,07\n\n-0,49\nCNY\n\nБирж.\n\n11,05\n\n-0,01\nUSD\n\nЦБ\n\n79,77\n\n+0,16\nEUR\n\nЦБ\n\n93,06\n\n-0,33\nCNY\n\nЦБ\n\n11,09\n\n+0,03\nUSD\n\nНал.\n\n82,39\n\n74,32\nEUR\n\nНал.\n\n96,58\n\n90,28\nCocoa\n\n680,50\n\n—%\nBTC/USD\n\nБирж.\n\n118 180,00\n\n-5 140,00\nMOEXBTC\n\n119 991,43\n\n+1,12%\nIMOEX\n\n2 977,34\n\n+0,15%\nRTSI\n\n1 175,86\n\n-0,06%\nBrent\n\n66,00\n\n—%\nPlatinum\n\n1 340,70\n\n-0,36%\nGold\n\n3 360,20\n\n+0,15%\nSilver\n\n38,75\n\n+1,20%\nAluminum\n\n2 618,50\n\n+0,27%\nNickel\n\n15 070,00\n\n-2,11%\n\nrbc.group\n\n# Новости экономики\n\n19:36",
+              "score": 0.68090034,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.kommersant.ru/rubric/3",
+              "title": "Последние новости экономики на сегодня - Коммерсантъ",
+              "content": "- [x] - [x] - [x]  Скопировать ссылку ВКонтактеTelegramTwitterОдноклассникиWhatsApp\n\n19.05.2025, 14:49\n\nImage 37: ЕК понизила прогноз роста ВВП России на 2025 годImage 38: ЕК понизила прогноз роста ВВП России на 2025 год\n\n19.05.2025, 14:49\n\nЕК понизила прогноз роста ВВП России на 2025 год\n-----------------------------------------------------------------------------------------\n\n   Экономика\n   ВВП России\n   Европа\n   Евросоюз\n   Статистика\n   Лента новостей\n\n 1 мин. [...] Экономика\n   Промышленность\n   Артем Чугунов\n   Газета «Коммерсантъ» №87 от 20.05.2025, стр. 2\n   Архив газеты «Коммерсантъ»\n\n 1 мин. \n\n- [x] - [x] - [x]  Скопировать ссылку ВКонтактеTelegramTwitterОдноклассникиWhatsApp\n\n19.05.2025, 19:18\n\nImage 31: Россия намерена обжаловать углеродный механизм ЕС в ВТОImage 32: Россия намерена обжаловать углеродный механизм ЕС в ВТО\n\n19.05.2025, 19:18 [...] Image 41: Россия впервые после 2022 года получила суверенный рейтинг за границейImage 42: Россия впервые после 2022 года получила суверенный рейтинг за границей\n\n19.05.2025, 08:40\n\nРоссия впервые после 2022 года получила суверенный рейтинг за границей\n---------------------------------------------------------------------------------------------------------------\n\n   Экономика\n   Россия в мировых рейтингах\n   Лента новостей\n\n 1 мин. [...] 20.05.2025, 01:43\n\nМСП выходит в плюс\n-----------------------------------------------------------\n\n### Правительственная комиссия обсудила направления развития малого бизнеса\n\n   Экономика\n   Малый бизнес\n   Правительство России\n   Кристина Боровикова\n   Главное\n   Газета «Коммерсантъ» №87 от 20.05.2025, стр. 2\n   Архив газеты «Коммерсантъ»\n\n 3 мин. \n\n- [x] - [x] - [x]  Скопировать ссылку ВКонтактеTelegramTwitterОдноклассникиWhatsApp\n\n20.05.2025, 01:43 [...] Россия намерена обжаловать углеродный механизм ЕС в ВТО\n------------------------------------------------------------------------------------------------\n\n   Экономика\n   Екатерина Отрашкевич\n   Лента новостей\n\n 1 мин. \n\n- [x] - [x] - [x]  Скопировать ссылку ВКонтактеTelegramTwitterОдноклассникиWhatsApp\n\n19.05.2025, 17:08\n\nImage 33: Новак: РФ и Китай продолжают обсуждать отмену пошлин на российский угольImage 34: Новак: РФ и Китай продолжают обсуждать отмену пошлин на российский уголь",
+              "score": 0.64880073,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.interfax.ru/business/",
+              "title": "Экономика - Новости Интерфакс",
+              "content": "10:55### Суд признал банкротом пензенскую аптечную сеть семьи Шпигель\n\n10:30### \"Ямал СПГ\" в 2024 году произвел более 21 млн т СПГ в год\n\n10:11### Рынок акций РФ открылся в основную сессию ростом индексов МосБиржи и РТС на 0,3%\n\n10:09### Рубль утром подрастает к юаню на фоне стабильной нефти\n\n10:08### Эксперимент по онлайн-продаже льготных и субсидируемых авиабилетов в РФ продлен до ноября 2026 г.\n\n09:19### Банк \"Санкт-Петербург\" в январе-мае увеличил чистую прибыль по РСБУ на 10,7% [...] 09:12### Инфляция в Великобритании в мае осталась ожидаемо на уровне 3,4%\n\n08:52### \"Росатом\" рассчитает размер субсидии ледокольной проводки в летне-осенний период\n\n08:42### Японский экспорт в мае снизился впервые за 8 месяцев\n\n08:38### Нефть Brent слабо дешевеет и торгуется у $76,3 за баррель\n\n08:29### \"Росатом\" оценивает коридор грузопотока по СМП в 2025 году в объеме 36-38,5 млн т\n\n08:15### \"Роснефть\" и \"Росатом\" подпишут долгосрочный контракт на атомный ледокол [...] 18:59### Рынок акций РФ во вторник вырос вслед за нефтью\n\n18:49### Закон об отказе от энергоносителей РФ примут квалифицированным большинством членов ЕС\n\n18:32### ЕС планирует заменить газ из РФ допснижением спроса, альтернативным СПГ и добычей в Румынии\n\n18:27### ИИ-стартап Маска xAI ведет переговоры о продаже акций на $4,3 млрд\n\n18:21### Цены на нефть ускорили рост, Brent у $75,3 за баррель\n\n17:31### \"Полиметалл\" построит новый ГОК в Свердловской области мощностью свыше 4,5 т золота в год [...] 12:08ПМЭФ-2025### Число выросших компаний малого бизнеса увеличилось в I половине 2025 года на 30%\n\n12:01### Американский производитель игрушек Hasbro сократил штат на 3%\n\n11:55### Силуанов обусловил экономию бюджета РФ от снижения ставки дальнейшими шагами ЦБ\n\n11:43### ФНС банкротит одну из редомицилированных структур группы \"Домодедово\"\n\n11:27### Компании РФ за I квартал в рамках ФИНВ выбрали только 2,6 млрд руб. из 150 млрд руб. [...] Published Time: Tue, 18 Jun 2025 12:20:06 GMT\n\nЭкономика - Новости Интерфакс\n\n===============\n\nМобильная версияОб \"Интерфаксе\"Interfax.comИнтерфакс-РоссияФинмаркетЕще...ТуризмНедвижимостьОбразованиеМероприятия\n\n74,65+3,28%17.06\nНефть (Crude смесь)90,77+0,11%22.08\nНикель15 000+0,23%17.06\nПалладий1 051,61+0,63%17.06\nПлатина1 268,9+0,38%17.06\nСеребро37,2+1,83%17.06",
+              "score": 0.63804686,
+              "raw_content": null
+            }
+          ],
+          "response_time": 0.7,
+          "request_id": "7e3c5f3d-6fe8-49fd-a227-296ad5bc1687"
+        }
+      }
+    ],
+    "AI Review Generator": [
+      {
+        "json": {
+          "output": "📊 РОССИЙСКАЯ ЭКОНОМИКА | 17 августа 2025\n\n🏦 РЕШЕНИЯ РЕГУЛЯТОРОВ:\nНа этой неделе замедление роста ВВП на 0,3% за квартал было связано с жесткой денежно-кредитной политикой Центробанка (ЦБ). Учитывая прогнозы Центра стратегических разработок (ЦСР), ожидания на снижение ключевой ставки могут позитивно сказаться на экономической динамике в ближайшие месяцы. Рекомендуется следить за объявлениями ЦБ и рассматривать возможность инвестирования в облигации и другие финансовые инструменты, связанные со снижением ставок.\n\n💱 ВАЛЮТА И СЫРЬЕ:\nКурс рубля продолжает оставаться под давлением. На данный момент доллар торгуется около 82 рублей. Цены на нефть остаются относительно стабильными, на уровне 66,33 долларов за баррель, несмотря на изменения в спросе и предложении на мировом рынке. Инвесторам стоит внимательно следить за тем, как изменения в ценах на энергоносители могут повлиять на валютный курс.\n\n🏢 КОРПОРАТИВНЫЕ НОВОСТИ:\nНекоторые крупные компании продолжают демонстрировать уверенный рост и соблюдение инвестиционных программ, несмотря на общее охлаждение экономики. Например, Сбербанк и его глава Греф указывают на признаки «резкого торможения» в экономике, что может создать нестабильность в ипотечном кредите. Инвесторы должны рассмотреть возможности вложений в компании, которые обеспечивают критически важные товары и услуги.\n\n💼 НОВОСТИ РЫНКА ЦЕННЫХ БУМАГ:\nРынок акций на данный момент проявляет себя довольно устойчиво, с повышениями в индексах. Однако настоятельно рекомендуется следить за финансовыми результатами компаний, чтобы не пропустить сигнал о возможных коррекциях в случае ухудшения экономической ситуации.\n\n💼 ВЛИЯНИЕ НА БИЗНЕС:\nБизнесы, которые зависят от импорта, могут столкнуться с дальнейшими трудностями, поскольку замедление роста и высокая инфляция продолжают оказывать давление на спрос. Также перспективы затягивания ценового контроля на продукты питания (мясо, яйца, картофель) могут отразиться на прибыли в пищевой отрасли. Предприятиям стоит пересмотреть свои цепочки поставок и сфокусироваться на локализации производства.\n\nВЫВОДЫ, РЕКОМЕНДАЦИИ И ПРОГНОЗЫ:\n1. **Инвестиции в облигации и финансовые инструменты**: Снижение ключевой ставки может стать хорошей возможностью для получения дохода от ОФЗ и других инструментов с фиксированной доходностью.\n2. **Осторожность с акциями**: Диверсификация портфеля среди компаний, более устойчивых к экономическим колебаниям, таких как IT и услуги, может снизить риски. \n3. **Сосредоточение на продовольственном секторе**: Следите за изменениями в ценах на базовые продукты и рассматривайте возможность инвестирования в компании, занимающиеся их производством.\n4. **Долгосрочная перспектива в секторе сырьевых ресурсов**: Учитывая текущую ситуацию на глобальном рынке, возможно, стоит воздержаться от краткосрочных торговых операций с сырьём, но рассмотреть долгосрочные стратегии на основе ожидаемых изменений в экономике.\n5. **Обдумывайте риски валютных операций**: Волатильность рубля может представлять опасность, особенно для компаний, работающих с валютным импортом. Рекомендуется внимательно следить за валютными позициями и заранее хеджировать риски.\n\nСоблюдение этих рекомендаций позволит инвесторам минимизировать риски и воспользоваться возможностями, которые открываются на фоне текущих экономических тенденций.",
+          "intermediateSteps": []
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Tavily Extract": {
+      "main": [
+        [
+          {
+            "node": "Split Out4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out2": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger3": {
+      "main": [
+        [
+          {
+            "node": "Tavily Search1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Tavily Extract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out4": {
+      "main": [
+        [
+          {
+            "node": "Concatenate Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily Search1": {
+      "main": [
+        [
+          {
+            "node": "Split Out2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Review Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Concatenate Content": {
+      "main": [
+        [
+          {
+            "node": "AI Review Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Review Generator": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Append a block",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a63dbaf1-0be8-4993-a356-40e580358796",
+  "meta": {
+    "instanceId": "b85f0d09f3d863b4b665ea0e3475dac5af387c16ba8aaf52f137a98c26bd5361"
+  },
+  "id": "ZedLXy3NbRqAF5lK",
+  "tags": []
+}
