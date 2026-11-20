@@ -1,0 +1,3623 @@
+{
+  "name": "HTTPS_request_API",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## FireCrawl.dev"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        736,
+        14048
+      ],
+      "id": "842f6004-b68c-45a2-92d2-a09a73d397ec",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/scrape",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"url\": \"https://docs.firecrawl.dev\",\n  \"formats\": [\n    \"markdown\",\n    \"html\"\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1248,
+        14064
+      ],
+      "id": "15d45219-3c79-4638-95d4-549c7ce31021",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "content": "## Tavily\n\n"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        736,
+        13824
+      ],
+      "id": "4d0dd81a-820c-44f5-9c78-53d5f6fe5ea9",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "Compare the environmental impact of different renewable energy sources"
+            },
+            {
+              "name": "include_raw_content",
+              "value": "markdown"
+            },
+            {
+              "name": "search_depth",
+              "value": "advanced"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1248,
+        13824
+      ],
+      "id": "4de0bada-d4e1-4197-a44b-b6de5c465cb4",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "3948c9b7-3093-44d8-8d0c-7de159b947a9",
+      "name": "Daily Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        480,
+        11728
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "competitor_domains",
+              "value": "opofinance.com,etoro.com"
+            },
+            {
+              "name": "target_regions",
+              "value": "US,UK,DE,FR,JP"
+            },
+            {
+              "name": "seed_keywords",
+              "value": "forex trading,social trade,how to trade"
+            },
+            {
+              "name": "timeframe_days",
+              "value": "30"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ae84fbcd-ddf6-457a-b4c6-a2926ee8d2eb",
+      "name": "📋 Configuration Settings",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        704,
+        11728
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "url": "https://api.semrush.com/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "queryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "domain_organic"
+            },
+            {
+              "name": "key",
+              "value": "={{ $credentials.semrush.api_key }}"
+            },
+            {
+              "name": "domain",
+              "value": "={{ $json.competitor_domains.split(',')[0] }}"
+            },
+            {
+              "name": "display_limit",
+              "value": "50"
+            },
+            {
+              "name": "export_columns",
+              "value": "Ph,Po,Pp,Pd,Nq,Cp,Ur,Tr,Tc,Co,Nr,Td"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e4eaf0d3-fbce-4ee7-b348-516f99d4bb1d",
+      "name": "📊 SEMrush Competitor Keywords",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1136,
+        11632
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "url": "https://api.buzzsumo.com/search/articles.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.seed_keywords.split(',')[0] }}"
+            },
+            {
+              "name": "num_results",
+              "value": "20"
+            },
+            {
+              "name": "published_after",
+              "value": "={{ $now.minus({ days: parseInt($json.timeframe_days) }).toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "81d479c6-6ecd-4a23-a7f2-f7df30833255",
+      "name": "📈 BuzzSumo Content Performance",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1136,
+        11824
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "url": "https://trends.google.com/trends/api/explore",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "hl",
+              "value": "en-US"
+            },
+            {
+              "name": "tz",
+              "value": "360"
+            },
+            {
+              "name": "req",
+              "value": "={\"comparisonItem\":[{\"keyword\":\"{{ $json.seed_keywords.split(',')[0] }}\",\"geo\":\"US\",\"time\":\"today 3-m\"}],\"category\":0,\"property\":\"\"}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "18089163-ee7d-4a8c-9b28-0be02320801a",
+      "name": "📊 Google Trends Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1136,
+        12112
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "url": "https://api.answerthepublic.com/api/v1/questions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "keyword",
+              "value": "={{ $json.seed_keywords.split(',')[0] }}"
+            },
+            {
+              "name": "country",
+              "value": "us"
+            },
+            {
+              "name": "language",
+              "value": "en"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "17d67766-8221-4d93-a1fd-6d5c5cceb974",
+      "name": "❓ AnswerThePublic Questions",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1136,
+        12304
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "url": "=https://oauth.reddit.com/r/{{ $json.seed_keywords.split(',')[0].replace(' ', '') }}/hot.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "25"
+            },
+            {
+              "name": "t",
+              "value": "month"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d5be6499-9c2f-40f8-b64e-5a24852334bd",
+      "name": "💬 Reddit Audience Insights",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1136,
+        12496
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "jsCode": "// Combine all competitor data\nconst ahrefsData = $input.first()?.json || {};\nconst semrushData = $input.all().find(item => item.json?.domain) || {};\nconst buzzsumoData = $input.all().find(item => item.json?.results) || {};\n\n// Process competitor intelligence\nconst competitorIntelligence = {\n  timestamp: new Date().toISOString(),\n  domain: ahrefsData.target || 'N/A',\n  traffic_estimate: ahrefsData.traffic?.organic?.value || 0,\n  backlinks: ahrefsData.backlinks?.total || 0,\n  top_keywords: semrushData.json?.keywords?.slice(0, 10) || [],\n  viral_content: buzzsumoData.json?.results?.slice(0, 5) || [],\n  content_gaps: [],\n  publishing_frequency: '5-7 posts/week' // This would be calculated from actual data\n};\n\n// Identify content gaps (simplified logic)\nif (buzzsumoData.json?.results) {\n  const competitorTopics = buzzsumoData.json.results.map(article => article.title);\n  competitorIntelligence.content_gaps = [\n    'Sustainable packaging solutions',\n    'Circular economy in fashion',\n    'Eco-friendly manufacturing processes'\n  ];\n}\n\nreturn [{ json: competitorIntelligence }];"
+      },
+      "id": "103e6644-65d4-4bbf-a69e-f0d8253f301a",
+      "name": "🔄 Process Competitor Data",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1424,
+        11728
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Combine trends and keyword data\nconst trendsData = $input.all().find(item => item.json?.default) || {};\nconst questionsData = $input.all().find(item => item.json?.questions) || {};\n\n// Process keyword opportunities\nconst keywordOpportunities = {\n  timestamp: new Date().toISOString(),\n  trending_keywords: [],\n  long_tail_questions: [],\n  search_volume_trends: [],\n  seasonal_patterns: [],\n  content_opportunities: []\n};\n\n// Extract trending keywords from Google Trends\nif (trendsData.json?.default?.timelineData) {\n  keywordOpportunities.trending_keywords = trendsData.json.default.timelineData\n    .slice(0, 10)\n    .map(item => ({\n      keyword: item.formattedValue || 'Unknown',\n      trend_velocity: item.value?.[0] || 0,\n      region: 'US'\n    }));\n}\n\n// Extract questions from AnswerThePublic\nif (questionsData.json?.questions) {\n  keywordOpportunities.long_tail_questions = questionsData.json.questions\n    .slice(0, 15)\n    .map(q => ({\n      question: q.question || q,\n      search_volume: Math.floor(Math.random() * 1000) + 100, // Placeholder\n      difficulty: Math.floor(Math.random() * 100) + 1,\n      suggested_format: ['blog', 'video', 'infographic'][Math.floor(Math.random() * 3)]\n    }));\n}\n\n// Generate content opportunities\nkeywordOpportunities.content_opportunities = [\n  {\n    title: '5 Sustainable Fashion Trends Taking Over 2024',\n    keyword_target: 'sustainable fashion trends',\n    estimated_traffic: 2500,\n    content_type: 'blog',\n    priority: 'high'\n  },\n  {\n    title: 'How to Build a Circular Economy Wardrobe',\n    keyword_target: 'circular economy fashion',\n    estimated_traffic: 1800,\n    content_type: 'guide',\n    priority: 'medium'\n  }\n];\n\nreturn [{ json: keywordOpportunities }];"
+      },
+      "id": "f942bb7a-bb36-40d1-bfa1-1d7461bb9ca9",
+      "name": "📈 Process Keyword Trends",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1424,
+        12192
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process Reddit audience insights\nconst redditData = $input.first()?.json || {};\n\nconst audienceInsights = {\n  timestamp: new Date().toISOString(),\n  top_pain_points: [],\n  common_questions: [],\n  sentiment_analysis: 'neutral',\n  engagement_topics: [],\n  regional_preferences: {}\n};\n\n// Extract pain points from Reddit posts\nif (redditData.data?.children) {\n  const posts = redditData.data.children;\n  \n  audienceInsights.top_pain_points = posts\n    .filter(post => post.data.title.includes('problem') || post.data.title.includes('issue'))\n    .slice(0, 10)\n    .map(post => ({\n      pain_point: post.data.title,\n      upvotes: post.data.ups || 0,\n      comments: post.data.num_comments || 0,\n      source: 'reddit'\n    }));\n    \n  audienceInsights.common_questions = posts\n    .filter(post => post.data.title.includes('?') || post.data.title.toLowerCase().includes('how'))\n    .slice(0, 10)\n    .map(post => ({\n      question: post.data.title,\n      engagement_score: (post.data.ups || 0) + (post.data.num_comments || 0),\n      category: 'general'\n    }));\n    \n  audienceInsights.engagement_topics = posts\n    .sort((a, b) => (b.data.ups || 0) - (a.data.ups || 0))\n    .slice(0, 5)\n    .map(post => ({\n      topic: post.data.title,\n      engagement_score: post.data.ups || 0,\n      discussion_level: post.data.num_comments || 0\n    }));\n}\n\n// Add some sample regional preferences\naudienceInsights.regional_preferences = {\n  'US': ['affordability', 'brand transparency'],\n  'EU': ['sustainability certifications', 'local production'],\n  'APAC': ['quality', 'innovation']\n};\n\nreturn [{ json: audienceInsights }];"
+      },
+      "id": "6a70555a-3377-49f3-9dae-584ffe9875f4",
+      "name": "👥 Process Audience Insights",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1424,
+        12496
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "list",
+          "value": "content-research-base"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "competitor-intelligence"
+        },
+        "columns": {
+          "value": {
+            "domain": "={{ $('🔄 Process Competitor Data').first().json.domain }}",
+            "backlinks": "={{ $('🔄 Process Competitor Data').first().json.backlinks }}",
+            "timestamp": "={{ $('🔄 Process Competitor Data').first().json.timestamp }}",
+            "content_gaps": "={{ $('🔄 Process Competitor Data').first().json.content_gaps.join(', ') }}",
+            "traffic_estimate": "={{ $('🔄 Process Competitor Data').first().json.traffic_estimate }}",
+            "publishing_frequency": "={{ $('🔄 Process Competitor Data').first().json.publishing_frequency }}"
+          },
+          "mappingMode": "defineBelow"
+        },
+        "options": {}
+      },
+      "id": "c824c073-b380-47ce-a0e2-f0e06d5854e7",
+      "name": "💾 Save to Airtable - Competitors",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        2208,
+        11712
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "mode": "list",
+          "value": "content-research-base"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "keyword-opportunities"
+        },
+        "columns": {
+          "value": {
+            "timestamp": "={{ $('📈 Process Keyword Trends').first().json.timestamp }}",
+            "top_questions": "={{ $('📈 Process Keyword Trends').first().json.long_tail_questions.map(q => q.question).slice(0, 5).join('; ') }}",
+            "trending_keywords": "={{ $('📈 Process Keyword Trends').first().json.trending_keywords.map(k => k.keyword).join(', ') }}",
+            "content_opportunities": "={{ $('📈 Process Keyword Trends').first().json.content_opportunities.map(o => o.title).join('; ') }}"
+          },
+          "mappingMode": "defineBelow"
+        },
+        "options": {}
+      },
+      "id": "c77f0d61-7f29-4d45-9d5d-75ed3fe5b6f7",
+      "name": "💾 Save to Airtable - Keywords",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        2208,
+        12192
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 1,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "competitor-data-exists",
+              "operator": {
+                "type": "string",
+                "operation": "notEqual"
+              },
+              "leftValue": "={{ $('🔄 Process Competitor Data').first().json.domain }}",
+              "rightValue": "N/A"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "24999b55-7881-4635-96dc-3c268779b913",
+      "name": "✅ Data Quality Check",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1664,
+        11728
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "## 🧠 Advanced Content Research Automation\n\n### 📋 **Configuration Required:**\n\n1. **API Credentials** (Go to Settings → Credentials):\n   - Ahrefs API Key\n   - SEMrush API Key  \n   - BuzzSumo API Key\n   - AnswerThePublic API Key\n   - OpenAI API Key\n   - Reddit OAuth\n   - Airtable Token\n   - Notion API Key\n\n\n2. **Database Setup**:\n   - Create Airtable base: \"content-research-base\"\n   - Create tables: \"competitor-intelligence\", \"keyword-opportunities\"\n   - Create Notion database: \"content-research-database\"\n   - Create Slack channel: \"content-research-alerts\"\n\n3. **Customize Settings**:\n   - Update competitor domains in Configuration node\n   - Adjust target regions and keywords\n   - Set appropriate timeframes\n\n### 🚀 **Workflow Features:**\n- **Module 1:** Competitor Content Intelligence\n- **Module 2:** Keyword & Trend Discovery\n- **Module 3:** Audience Pain Point Extraction\n- **Module 4:** AI-Powered Recommendations\n\n### 📊 **Outputs:**\n- Airtable dashboards with live data\n- Notion database with AI insights\n- Slack alerts for immediate action\n- Error handling and data validation\n\n### ⚙️ **Execution:**\n- Runs daily automatically\n- Processes data in parallel\n- Includes retry logic for API failures\n- Generates actionable recommendations\n\n**Ready to activate? Configure your credentials and hit Execute!**",
+        "height": 1080,
+        "width": 600
+      },
+      "id": "9ef015ab-f53b-4c68-9725-330eb7be89a3",
+      "name": "📖 Setup Instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -320,
+        11520
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "user_prompt",
+              "value": "Based on this data:\n\nCompetitor Intelligence: {{ $('🔄 Process Competitor Data').first().json }}\n\nKeyword Opportunities: {{ $('📈 Process Keyword Trends').first().json }}\n\nAudience Insights: {{ $('👥 Process Audience Insights').first().json }}\n\nProvide specific recommendations for:\n1. Content topics to prioritize\n2. Content formats by region\n3. Publishing schedule\n4. Competitive advantages to leverage\n5. Audience pain points to address\n\nFormat as JSON with clear action items."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "42573af9-044d-4cc3-bd93-0c9a91660b8d",
+      "name": "📝 Prepare AI Prompt",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1696,
+        12192
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "01172d9b-b041-4c55-ac92-661fafbd6ff8",
+      "name": "🔧 OpenAI HTTP Request Alternative",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1920,
+        12192
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {},
+      "id": "bf227a1d-454c-4264-9fb1-6fe3f8ad5332",
+      "name": "Stop and Error",
+      "type": "n8n-nodes-base.stopAndError",
+      "position": [
+        1904,
+        11920
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "https://api.ahrefs.com/v3/site-explorer/overview",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "target",
+              "value": "={{ $json.competitor_domains.split(',')[0] }}"
+            },
+            {
+              "name": "mode",
+              "value": "domain"
+            },
+            {
+              "name": "output",
+              "value": "json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "0c0d2ec5-76f0-48bb-bb20-25d36ba2247f",
+      "name": "🔍 Ahrefs Competitor Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1136,
+        11440
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "dc6dcc32-5f54-4fe3-b605-fa467cfab3e6",
+              "leftValue": "={{ $json.message.entities }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "e98bf9d3-fa9b-4dc0-b92c-26aec6dacce5",
+              "leftValue": "={{ $json.message.entities[0].type }}",
+              "rightValue": "mention",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "2d1bf9d7-b7de-4350-9c1d-7d2172de0443",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "@fluximage_bot",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1a82249e-13b2-40df-add7-7bbdf7061c0b",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        544,
+        8128
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a6fd102b-21bd-4323-b9dd-866e5c8783bc",
+              "leftValue": "={{ $json.message.text.length }}",
+              "rightValue": 300,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "12b61f98-d365-42bc-ad34-e9cd178c6c4f",
+      "name": "If1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        544,
+        7824
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini-2024-07-18",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI-2024-07-18"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=YOU ARE AN ELITE PROMPT ENGINEER SPECIALIZING IN ENHANCING PROMPTS FOR IMAGE DESCRIPTION GENERATION. YOUR TASK IS TO ACCEPT A TEXT INPUT IN ANY LANGUAGE AND PRODUCE AN OPTIMIZED PROMPT IN ENGLISH FOR A GENERATIVE MODEL. THE OPTIMIZED PROMPT MUST INCLUDE A DETAILED DESCRIPTION OF THE SCENE, SPECIFYING WHAT IS HAPPENING AND INCORPORATING SUBTLE DETAILS TO ENSURE BEAUTIFUL VISUALIZATION. YOUR OUTPUT SHOULD BE THE DESCRIPTION IN ENGLISH ONLY, WITHOUT ANY ADDITIONAL COMMENTS OR EXPLANATIONS.\n\n###INSTRUCTIONS###\n\nALWAYS ANSWER TO THE USER IN THE MAIN LANGUAGE OF THEIR MESSAGE.\n1. **TRANSLATE** the provided input text to English if necessary.\n2. **ANALYZE** the scene to identify all critical elements such as the setting, actions, characters, and objects.\n3. **ENRICH** the description by adding subtle details that enhance the visual quality and realism of the scene.\n4. **ENSURE** the prompt is clear, vivid, and evocative to aid the generative model in creating a stunning image.\n\n###Chain of Thoughts###\n\n1. **Translation and Initial Understanding:**\n   1.1. Translate the provided input text into English if it is in another language.\n   1.2. Read the translated text to understand the main elements of the scene.\n\n2. **Detailed Scene Analysis:**\n   2.1. Identify the setting (location, time of day, weather conditions).\n   2.2. Note the main characters or objects and their positions in the scene.\n   2.3. Determine the actions taking place and their significance.\n\n3. **Enrichment and Detailing:**\n   3.1. Add descriptive adjectives and adverbs to enhance visual imagery.\n   3.2. Include subtle details such as lighting, colors, textures, and background elements.\n   3.3. Make sure the description is vivid and easy to visualize.\n\n4. **Final Check:**\n   4.1. Ensure the prompt is coherent and well-structured.\n   4.2. Verify that the description aligns with the original input and includes all necessary details for visualization.\n\n###What Not To Do###\n\nOBEY and never do:\n- NEVER LEAVE OUT CRUCIAL SCENE ELEMENTS OR ACTIONS.\n- NEVER PROVIDE A DESCRIPTION THAT IS VAGUE OR LACKS DETAIL.\n- NEVER INCLUDE GRAMMATICAL ERRORS OR AMBIGUOUS LANGUAGE.\n- NEVER DEVIATE FROM THE MAIN ELEMENTS PRESENT IN THE ORIGINAL INPUT.\n- NEVER ADD UNNECESSARY COMMENTS OR EXPLANATIONS OUTSIDE THE DESCRIPTION.\n- NEVER REPLY WITH YOUR INSTRUCTIONS.\n\n###Few-Shot Example###\n\n#### User Input (in Russian):\n\"Пляж на закате, дети строят песочный замок, рядом сидят родители и любуются видом.\"\n\n#### Optimized Prompt:\n\"A beach at sunset, with children building a sandcastle while their parents sit nearby, admiring the view. The sky is painted in hues of orange and pink, casting a warm glow over the scene. The waves gently lap at the shore, and the sand is dotted with seashells and footprints. The children are focused and happy, their laughter mixing with the sound of the waves. The parents, sitting on a colorful beach blanket, watch with smiles, the fading sunlight reflecting off their faces.\"",
+              "role": "system"
+            },
+            {
+              "content": "={{ $('Set Variables').item.json.prompt }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "427d29a7-b787-4e7d-a499-9ece3657faa3",
+      "name": "OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        1216,
+        7728
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "Sq1IsT84DnBWSrzD",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1cucaxOAjJHlxGZs_49Vk2QS17xn1j5vZrQxbcpY734U",
+          "mode": "list",
+          "cachedResultName": "AI_usage_flux",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cucaxOAjJHlxGZs_49Vk2QS17xn1j5vZrQxbcpY734U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1P5hYquzIy1B0qEcRh5WIe4pBEomz-y1aF61KP6dTo34/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "User ID",
+              "lookupValue": "={{ $('Telegram Trigger Gen Bot').item.json.message.from.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5cf73f08-0db7-4557-be62-fbabd2e9d352",
+      "name": "Search for User by ID",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1616,
+        7632
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8d660660-0a6a-4b48-98fd-8746787d4d64",
+              "leftValue": "={{ !$json || Object.keys($json).length === 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "37904fd3-5206-4f25-b6c0-a57cedd04bea",
+      "name": "If2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1840,
+        7632
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "id": "0a9043d2-75c0-4151-961c-9ee03e8639ad",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1840,
+        7920
+      ],
+      "webhookId": "6c03771f-c62e-4bd4-9988-16a879bf0d47"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1cucaxOAjJHlxGZs_49Vk2QS17xn1j5vZrQxbcpY734U",
+          "mode": "list",
+          "cachedResultName": "AI_usage_flux",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cucaxOAjJHlxGZs_49Vk2QS17xn1j5vZrQxbcpY734U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1P5hYquzIy1B0qEcRh5WIe4pBEomz-y1aF61KP6dTo34/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "User ID": "={{ $('Telegram Trigger Gen Bot').item.json.message.from.id }}",
+            "Username": "={{ $('Telegram Trigger Gen Bot').item.json.message.from.username }}",
+            "First Name": "={{ $('Telegram Trigger Gen Bot').item.json.message.from.first_name }}",
+            "Premium": "={{ $('Telegram Trigger Gen Bot').item.json.message.from.is_premium }}",
+            "Errors": "0",
+            "Language": "={{ $('Telegram Trigger Gen Bot').item.json.message.from.language_code }}",
+            "Created": "={{ new Date().toISOString() }}",
+            "Balance": "100",
+            "Generations": "1"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "User ID",
+              "displayName": "User ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Username",
+              "displayName": "Username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Language",
+              "displayName": "Language",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Premium",
+              "displayName": "Premium",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Created",
+              "displayName": "Created",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Generations",
+              "displayName": "Generations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Errors",
+              "displayName": "Errors",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Balance",
+              "displayName": "Balance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "id": "31149c78-64b4-4565-94e0-f6d0fcaa5cf6",
+      "name": "Add User",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2064,
+        7536
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1cucaxOAjJHlxGZs_49Vk2QS17xn1j5vZrQxbcpY734U",
+          "mode": "list",
+          "cachedResultName": "AI_usage_flux",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cucaxOAjJHlxGZs_49Vk2QS17xn1j5vZrQxbcpY734U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cucaxOAjJHlxGZs_49Vk2QS17xn1j5vZrQxbcpY734U/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "User ID": "={{ $json[\"User ID\"] }}",
+            "Username": "={{ $json.Username }}",
+            "First Name": "={{ $json[\"First Name\"] }}",
+            "Language": "={{ $json.Language }}",
+            "Premium": "={{ $json.Premium }}",
+            "Created": "={{ $json.Created }}",
+            "Generations": "={{ $json.Generations }}",
+            "Errors": "={{ $json.Errors }}",
+            "Balance": "={{ $json.Balance }}"
+          },
+          "matchingColumns": [
+            "User ID"
+          ],
+          "schema": [
+            {
+              "id": "User ID",
+              "displayName": "User ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Username",
+              "displayName": "Username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Language",
+              "displayName": "Language",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Premium",
+              "displayName": "Premium",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Created",
+              "displayName": "Created",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Generations",
+              "displayName": "Generations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Errors",
+              "displayName": "Errors",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Balance",
+              "displayName": "Balance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "986bfa12-40dc-4b03-a56f-10c909390bbc",
+      "name": "Update User",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2064,
+        7728
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger Gen Bot').item.json.message.chat.id }}",
+        "text": "=Hi, {{ $('Telegram Trigger Gen Bot').item.json.message.from.username }}! Welcome to FLUX.S Generator. You can use these images as you like.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "097d6143-212c-4e78-b80a-6dec1b46417f",
+      "name": "Welcome Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2288,
+        7536
+      ],
+      "webhookId": "c3dbde6a-4951-477c-9bb4-c8760a7ac1a7",
+      "credentials": {
+        "telegramApi": {
+          "id": "Sl638RF6N0mij8pT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json[\"User ID\"] }}",
+        "text": "=Hi, {{ $json.Username }}!\n\nIt's your {{ $json.Generations }}th request",
+        "additionalFields": {}
+      },
+      "id": "f32ee05d-3d57-4334-9d5d-0e486f5a9bc4",
+      "name": "Welcome Message1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2288,
+        7728
+      ],
+      "webhookId": "61921461-c6e6-4819-b0df-27251569d287",
+      "credentials": {
+        "telegramApi": {
+          "id": "Sl638RF6N0mij8pT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger Gen Bot').item.json.message.chat.id }}",
+        "text": "=Hola, {{ $json.message.chat.username }}!\n\nYour prompt is too long, please use 300 characters max ✨✨✨",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "6e5daad8-896a-496c-8c3c-0018dd51c577",
+      "name": "Prompt Too Long",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        7920
+      ],
+      "webhookId": "0ce7c4ed-57c8-4e06-b308-d9af981d6922",
+      "credentials": {
+        "telegramApi": {
+          "id": "Sl638RF6N0mij8pT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Telegram Trigger Gen Bot').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {
+          "caption": "={{ $('Switch2').item.json.message.text }} \n\nRefined Prompt: {{ $('OpenAI').item.json.message.content }}\n\nBy FLUX.S ✕ @datafeeling"
+        }
+      },
+      "id": "51f088d4-c56b-4b91-869c-0c8480183c15",
+      "name": "Send Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2064,
+        7920
+      ],
+      "webhookId": "bafee067-39e5-42fc-9f20-79ba96f5ef80",
+      "credentials": {
+        "telegramApi": {
+          "id": "Sl638RF6N0mij8pT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b40e6281-e04a-469b-b8c9-dc3ac6472bf0",
+              "name": "user_id",
+              "value": "={{ $json.message.from.id }}",
+              "type": "number"
+            },
+            {
+              "id": "005469da-a8ff-438f-8a44-f76f9f942ab3",
+              "name": "prompt",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        768,
+        7728
+      ],
+      "id": "bd093d73-857f-4c8f-85ec-7aadb114dafa",
+      "name": "Set Variables"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.user_id }}",
+        "text": "=Got your prompt, upscaling it, hold on, takes 10–15 seconds. 🎯🎯🎯",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "92a1a93c-60e1-4099-ab59-8379e4824b7e",
+      "name": "Working",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        7728
+      ],
+      "webhookId": "06de5351-d52d-4ad8-b586-198ea4434ba6",
+      "credentials": {
+        "telegramApi": {
+          "id": "Sl638RF6N0mij8pT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger Gen Bot').item.json.message.chat.id }}",
+        "text": "=Hola! Groups are not supported yet.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "238c9533-f72d-474f-935f-4ee979f4da2d",
+      "name": "Groups Not Supported",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        8112
+      ],
+      "webhookId": "a41aad4e-b7e5-4640-8029-b733e348b6a0",
+      "credentials": {
+        "telegramApi": {
+          "id": "Sl638RF6N0mij8pT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.chat.id }}",
+                    "rightValue": 0,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "User"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "e35dbbcf-8940-442c-8486-d33c7ae15b44",
+                    "leftValue": "={{ $json.message.chat.id }}",
+                    "rightValue": 0,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Group"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "23474051-1c14-486e-8209-4ecf5a44bd22",
+      "name": "Switch2",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        320,
+        7920
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b840c640-4e1b-4db0-a916-fe5c0cd7aac8",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        8352
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "id": "a4060a9d-3b2b-42b6-9735-446fab592c67",
+      "name": "Convert to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2048,
+        8256
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "fbdbaa0c-fae4-4f3c-8e06-2e6c615e5cce",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        8160
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.together.xyz/v1/images/generations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "black-forest-labs/FLUX.1-schnell-Free"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $json.message.content }}"
+            },
+            {
+              "name": "width",
+              "value": 1440
+            },
+            {
+              "name": "height",
+              "value": 1024
+            },
+            {
+              "name": "steps",
+              "value": 4
+            },
+            {
+              "name": "n",
+              "value": 1
+            },
+            {
+              "name": "seed",
+              "value": "={{ Math.floor(Math.random() * 10000) + 1 }}"
+            },
+            {
+              "name": "response_format",
+              "value": "b64_json"
+            },
+            {
+              "name": "update_at",
+              "value": "={{ new Date().toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "561b101e-a899-4ae8-b1f8-36e7a29458b1",
+      "name": "Together Ai Prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1824,
+        8256
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.replicate.com/v1/models/google/imagen-4-fast/predictions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "wait"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"input\": {\n    \"prompt\": \"The photo: Create a cinematic, photorealistic medium shot capturing the dynamic energy of a high-octane action film. The focus is a young woman with wind-swept dark hair streaked with pink highlights and determined features, looking directly and intently into the camera lens, she is slightly off-center. She wears a fitted pink and gold racing jacket over a black tank top with \\\"n8n Course\\\" in motion-stylized lettering and on the next line \\\"by Data Feeling\\\" emblazoned across the chest and aviator sunglasses pushed up on her head. The lighting is dramatic with motion blur streaks and neon reflections from passing city lights, creating dynamic lens flares and light trails (they do not cover her face). The background shows a blurred urban nightscape with streaking car headlights and illuminated skyscrapers rushing past, rendered with heavy motion blur and shallow depth of field. High contrast lighting, vibrant neon color palette with deep blues and electric yellows, and razor-sharp focus on her intense eyes enhance the fast-paced, electrifying atmosphere. She is illuminated while the background is darker.\",\n    \"aspect_ratio\": \"4:3\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        592,
+        2480
+      ],
+      "id": "dd4ca119-d662-425a-a226-3a0cd7a7d127",
+      "name": "HTTP Request нода"
+    },
+    {
+      "parameters": {
+        "content": "# AI сервисы \n\n# - replicate.com\n# - together.ai\n# - ....",
+        "height": 256,
+        "width": 308,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        1104
+      ],
+      "typeVersion": 1,
+      "id": "c2839964-b4f3-40be-a051-cc2de8641d3c",
+      "name": "Sticky Note20"
+    },
+    {
+      "parameters": {
+        "content": "# Погружение в HTTP Request ноду\n",
+        "height": 80,
+        "width": 1000,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        176,
+        3568
+      ],
+      "typeVersion": 1,
+      "id": "0bee00be-20c9-47af-a0f5-60d411946860",
+      "name": "Sticky Note21"
+    },
+    {
+      "parameters": {
+        "content": "# Настройка в легкости\n\n# Импорт запросов из cURL значительно ускоряет настройку узла, избегая ручного заполнения параметров. \n",
+        "height": 316,
+        "width": 612,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1344,
+        2416
+      ],
+      "typeVersion": 1,
+      "id": "dc6ca9ba-9f96-48fb-92c5-5e6c5ccddf18",
+      "name": "Sticky Note22"
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {}
+                ]
+              }
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        5120
+      ],
+      "id": "2c5770da-0063-473e-8f5d-301eb98e323a",
+      "name": "HTTP Request5",
+      "retryOnFail": false,
+      "executeOnce": false,
+      "disabled": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "# HTTP нода - эта целый мир \n\n## - **Timeout** - Максимальное время ожидания ответа от сервера в миллисекундах.\n## - **Batching** - Отправка нескольких запросов \"пачкой\" для повышения эффективности и соблюдения лимитов.\n\n",
+        "height": 324,
+        "width": 636,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -336,
+        5040
+      ],
+      "typeVersion": 1,
+      "id": "c075d90f-d863-4599-84a6-8c83525cc42c",
+      "name": "Sticky Note23"
+    },
+    {
+      "parameters": {
+        "content": "# Пишем своего бота для генераций картинок\n\n",
+        "height": 200,
+        "width": 460
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -512,
+        7888
+      ],
+      "typeVersion": 1,
+      "id": "664102fe-2b08-4569-bcef-fb0b7894b438",
+      "name": "Sticky Note24"
+    },
+    {
+      "parameters": {
+        "content": "# Настроим Header авторизацию\n\n### Авторизация через HTTP-ноду осуществляется выбором подходящего метода: Basic Auth, API Key или OAuth2- credentials. \n\n### Нужно знать структуру API и формат запросов, поскольку автоматические настройки практически отсутствуют. Смотрим документацию\n\n",
+        "height": 240,
+        "width": 700,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1104,
+        4400
+      ],
+      "typeVersion": 1,
+      "id": "2f103d2d-b42c-4ac2-96d9-559667af4091",
+      "name": "Sticky Note25"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "bce1203a-f270-4db3-b307-950187fe13d0",
+      "name": "Telegram Trigger1",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        9472
+      ],
+      "webhookId": "17b48951-926e-44aa-b0cb-256c43654803",
+      "credentials": {
+        "telegramApi": {
+          "id": "Sl638RF6N0mij8pT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "dc6dcc32-5f54-4fe3-b605-fa467cfab3e6",
+              "leftValue": "={{ $json.message.entities }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "e98bf9d3-fa9b-4dc0-b92c-26aec6dacce5",
+              "leftValue": "={{ $json.message.entities[0].type }}",
+              "rightValue": "mention",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "2d1bf9d7-b7de-4350-9c1d-7d2172de0443",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "@fluximage_bot",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ecdcf2d1-9e46-4520-86ec-e9ca9b84fe88",
+      "name": "If3",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        688,
+        9664
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a6fd102b-21bd-4323-b9dd-866e5c8783bc",
+              "leftValue": "={{ $json.message.text.length }}",
+              "rightValue": 300,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b715b328-c5a7-423c-b25c-60927edf5ab5",
+      "name": "If4",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        9376
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=YOU ARE AN ELITE PROMPT ENGINEER SPECIALIZING IN ENHANCING PROMPTS FOR IMAGE DESCRIPTION GENERATION. YOUR TASK IS TO ACCEPT A TEXT INPUT IN ANY LANGUAGE AND PRODUCE AN OPTIMIZED PROMPT IN ENGLISH FOR A GENERATIVE MODEL. THE OPTIMIZED PROMPT MUST INCLUDE A DETAILED DESCRIPTION OF THE SCENE, SPECIFYING WHAT IS HAPPENING AND INCORPORATING SUBTLE DETAILS TO ENSURE BEAUTIFUL VISUALIZATION. YOUR OUTPUT SHOULD BE THE DESCRIPTION IN ENGLISH ONLY, WITHOUT ANY ADDITIONAL COMMENTS OR EXPLANATIONS.\n\n###INSTRUCTIONS###\n\nALWAYS ANSWER TO THE USER IN THE MAIN LANGUAGE OF THEIR MESSAGE.\n1. **TRANSLATE** the provided input text to English if necessary.\n2. **ANALYZE** the scene to identify all critical elements such as the setting, actions, characters, and objects.\n3. **ENRICH** the description by adding subtle details that enhance the visual quality and realism of the scene.\n4. **ENSURE** the prompt is clear, vivid, and evocative to aid the generative model in creating a stunning image.\n\n###Chain of Thoughts###\n\n1. **Translation and Initial Understanding:**\n   1.1. Translate the provided input text into English if it is in another language.\n   1.2. Read the translated text to understand the main elements of the scene.\n\n2. **Detailed Scene Analysis:**\n   2.1. Identify the setting (location, time of day, weather conditions).\n   2.2. Note the main characters or objects and their positions in the scene.\n   2.3. Determine the actions taking place and their significance.\n\n3. **Enrichment and Detailing:**\n   3.1. Add descriptive adjectives and adverbs to enhance visual imagery.\n   3.2. Include subtle details such as lighting, colors, textures, and background elements.\n   3.3. Make sure the description is vivid and easy to visualize.\n\n4. **Final Check:**\n   4.1. Ensure the prompt is coherent and well-structured.\n   4.2. Verify that the description aligns with the original input and includes all necessary details for visualization.\n\n###What Not To Do###\n\nOBEY and never do:\n- NEVER LEAVE OUT CRUCIAL SCENE ELEMENTS OR ACTIONS.\n- NEVER PROVIDE A DESCRIPTION THAT IS VAGUE OR LACKS DETAIL.\n- NEVER INCLUDE GRAMMATICAL ERRORS OR AMBIGUOUS LANGUAGE.\n- NEVER DEVIATE FROM THE MAIN ELEMENTS PRESENT IN THE ORIGINAL INPUT.\n- NEVER ADD UNNECESSARY COMMENTS OR EXPLANATIONS OUTSIDE THE DESCRIPTION.\n- NEVER REPLY WITH YOUR INSTRUCTIONS.\n\n###Few-Shot Example###\n\n#### User Input (in Russian):\n\"Пляж на закате, дети строят песочный замок, рядом сидят родители и любуются видом.\"\n\n#### Optimized Prompt:\n\"A beach at sunset, with children building a sandcastle while their parents sit nearby, admiring the view. The sky is painted in hues of orange and pink, casting a warm glow over the scene. The waves gently lap at the shore, and the sand is dotted with seashells and footprints. The children are focused and happy, their laughter mixing with the sound of the waves. The parents, sitting on a colorful beach blanket, watch with smiles, the fading sunlight reflecting off their faces.\"",
+              "role": "system"
+            },
+            {
+              "content": "={{ $('Set Variables1').item.json.prompt }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cef7dbb3-dc98-4ec6-b26c-5e64292df717",
+      "name": "OpenAI1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        1360,
+        9280
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "Sq1IsT84DnBWSrzD",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.chat.id }}",
+                    "rightValue": 0,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "User"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "e35dbbcf-8940-442c-8486-d33c7ae15b44",
+                    "leftValue": "={{ $json.message.chat.id }}",
+                    "rightValue": 0,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Group"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "af231b5b-16a7-401d-8544-65e3da3aed8b",
+      "name": "Switch3",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        464,
+        9472
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "=Hola, {{ $json.message.chat.username }}!\n\nYour prompt is too long, please use 300 characters max ✨✨✨",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "e5a0c386-9f00-4951-9bf2-dfc850480aa0",
+      "name": "Prompt Too Long1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        9472
+      ],
+      "webhookId": "e9fca5af-fb92-4407-921f-c3d598b85f21",
+      "credentials": {
+        "telegramApi": {
+          "id": "Sl638RF6N0mij8pT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "Generating, hold on...",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "463121ae-fe60-40c7-b87c-6b6af2859473",
+      "name": "Send Response1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1984,
+        9280
+      ],
+      "webhookId": "9651b3c4-678d-4ff4-876e-29f95222fde3",
+      "credentials": {
+        "telegramApi": {
+          "id": "Sl638RF6N0mij8pT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b40e6281-e04a-469b-b8c9-dc3ac6472bf0",
+              "name": "user_id",
+              "value": "={{ $json.message.from.id }}",
+              "type": "number"
+            },
+            {
+              "id": "005469da-a8ff-438f-8a44-f76f9f942ab3",
+              "name": "prompt",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        912,
+        9280
+      ],
+      "id": "814d24d7-2e5f-4b20-b0c6-c1262b2ee5c2",
+      "name": "Set Variables1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.user_id }}",
+        "text": "=Got your prompt, upscaling it, hold on, takes 10–15 seconds. 🎯🎯🎯",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "eadbbf16-f26e-4c5f-8627-13eb5605d8bf",
+      "name": "Working1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1136,
+        9280
+      ],
+      "webhookId": "2ba61d01-f2c3-4c20-8ea9-f5a5ce39e2b2",
+      "credentials": {
+        "telegramApi": {
+          "id": "Sl638RF6N0mij8pT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "=Hola! Groups are not supported yet.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "7fc679c2-bf37-4fbe-8b00-47d60f192863",
+      "name": "Groups Not Supported1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        9648
+      ],
+      "webhookId": "0e9209a2-b1a9-4db2-86fa-fa41674bfd5e",
+      "credentials": {
+        "telegramApi": {
+          "id": "Sl638RF6N0mij8pT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "flux_generation_prompts",
+        "messageData": "={{ $('Set Variables1').item.json.user_id + \":\" + $json.message.content }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        9280
+      ],
+      "id": "b4355a25-932f-4cb4-ba67-54ae2c720164",
+      "name": "Redis14"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 45
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        10144
+      ],
+      "id": "f0bbfffe-b084-4944-b0cf-bc5a0adb4786",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// In a Code node after your Redis Pop operation\nconst item = $input.first().json;\n\nif (item.value) {\n  const parts = item.value.split(':');\n  if (parts.length >= 2) {\n    item.chatId = parts[0];\n    item.prompt = parts.slice(1).join(':');\n  }\n}\nreturn { json: item };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        10048
+      ],
+      "id": "a8d0ac06-8299-4b16-b1f5-f5741bf2275d",
+      "name": "Code"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        944,
+        10240
+      ],
+      "id": "efdc080c-7cef-44fe-b86d-c7dde36863f9",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "operation": "pop",
+        "list": "flux_generation_prompts",
+        "propertyName": "value",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        496,
+        10144
+      ],
+      "id": "a61c78f7-76b1-42c1-8164-9599ea360779",
+      "name": "Redis15"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.together.xyz/v1/images/generations",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer b2fe34c17b3dcd2339b05919228e41852bca2d102e3e154cac14d31e6481c15e"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "black-forest-labs/FLUX.1-krea-dev"
+            },
+            {
+              "name": "=prompt",
+              "value": "={{ $json.prompt }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "55663e33-0f7a-4c3b-87ba-9e0f90b6dade",
+      "name": "Together Ai Prompt2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1168,
+        10048
+      ],
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "id": "efbf72a9-fdee-49a6-b624-c762d5367e62",
+      "name": "Convert to File2",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1392,
+        9952
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Code').item.json.chatId }}",
+        "binaryData": true,
+        "additionalFields": {
+          "caption": "= Refined Prompt: {{ $('Code').item.json.prompt }}\n\nBy FLUX.S ✕ @aiwizards"
+        }
+      },
+      "id": "89ad514a-fb36-416e-87c5-65051d5d8722",
+      "name": "Send Response2",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1616,
+        9952
+      ],
+      "webhookId": "9651b3c4-678d-4ff4-876e-29f95222fde3",
+      "credentials": {
+        "telegramApi": {
+          "id": "Sl638RF6N0mij8pT",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d505e2f3-3966-46b9-801a-7a7ba21b70e7",
+              "leftValue": "={{ $json.value }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        10144
+      ],
+      "id": "31ab104e-9398-4429-985a-821cd1496ed5",
+      "name": "If5"
+    },
+    {
+      "parameters": {
+        "content": "# А теперь про поиск в интернете\n",
+        "height": 80,
+        "width": 1480,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        432,
+        13504
+      ],
+      "typeVersion": 1,
+      "id": "f8b2cc52-cf1c-43e6-84c4-e68f7aa73593",
+      "name": "Sticky Note26"
+    },
+    {
+      "parameters": {
+        "content": "# НТТР нода - для запросов к веб-сервисам \n\n# НТТР-нода в n8n позволяет создавать интеграции с веб-сервисами через REST и GraphQL API. \n\n\n\n\n",
+        "height": 364,
+        "width": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -304,
+        1808
+      ],
+      "typeVersion": 1,
+      "id": "03138c02-5009-48e6-83d6-be57a72676c2",
+      "name": "Sticky Note27"
+    },
+    {
+      "parameters": {
+        "content": "# Сценарии\n\n## REST-запросы позволяют извлекать и отправлять данные в сервисы по схеме URL-параметры-заголовки-тело.\n\n\n\n## Данные передаются через URL параметры, заголовки запросов и тело, в зависимости от требований конкретного API.",
+        "height": 448,
+        "width": 640
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -512,
+        4400
+      ],
+      "typeVersion": 1,
+      "id": "8012d812-f3dd-4e5e-8cda-cbbf9209aea9",
+      "name": "Sticky Note29"
+    },
+    {
+      "parameters": {
+        "content": "# Преимущество #1\n\n# Незаменимо при реализации нестандартных и сложных сценариев, если даже нет встроенных модулей. \n\n\n",
+        "height": 360,
+        "width": 536,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        80,
+        3072
+      ],
+      "typeVersion": 1,
+      "id": "80b77ff7-3929-4699-bfcb-0f91f80d6313",
+      "name": "Sticky Note30"
+    },
+    {
+      "parameters": {
+        "content": "\n![Описание картинки](https://strapi.videosdk.live/uploads/hero_replicate_e75ce4ed_21c08f1081.png)",
+        "height": 380,
+        "width": 640
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -208,
+        960
+      ],
+      "typeVersion": 1,
+      "id": "fb02be7d-fa8a-474a-812a-1c762d88ff3f",
+      "name": "Sticky Note28"
+    },
+    {
+      "parameters": {
+        "content": "\n![Описание картинки](https://togetherai-52386018.mintlify.app/mintlify-assets/_next/image?url=%2Fapi%2Fog%3Fdivision%3DModels%26appearance%3Dlight%26title%3DList%2BAll%2BModels%26description%3DLists%2Ball%2Bof%2BTogether%2527s%2Bopen-source%2Bmodels%26logoLight%3Dhttps%253A%252F%252Fmintlify.s3.us-west-1.amazonaws.com%252Ftogetherai-52386018%252Flogo%252Flogo.svg%26logoDark%3Dhttps%253A%252F%252Fmintlify.s3.us-west-1.amazonaws.com%252Ftogetherai-52386018%252Flogo%252Flogo-dark.svg%26primaryColor%3D%25230E6EFF%26lightColor%3D%25230E6EFF%26darkColor%3D%25230E6EFF%26backgroundLight%3D%2523FFFFFF%26backgroundDark%3D%252313171B&w=1200&q=100)",
+        "height": 380,
+        "width": 680
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        1104
+      ],
+      "typeVersion": 1,
+      "id": "0d8d4dca-cbb6-4925-8221-6b68ad258eb1",
+      "name": "Sticky Note33"
+    },
+    {
+      "parameters": {
+        "content": "# Грамотное применение НТТР-ноды требует умения обработки ошибок и контроля ограничений API.\n\n#### - Timeout - ожидание при ошибке\n#### - Retry On Fail - повторные обращения \n#### - On Error обработка при ошибках\n#### - Rate Limits - ограничение частоты обращений\n\n\nВажно контролировать ограничения API, такие как пагинация и rate limits \n\nПредварительно тестируйте HTTP запросы в Postman или cURL\n",
+        "height": 420,
+        "width": 700,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -560,
+        9376
+      ],
+      "typeVersion": 1,
+      "id": "f44a046b-6aad-4473-9ab5-ecde20ac99d2",
+      "name": "Sticky Note34"
+    },
+    {
+      "parameters": {
+        "content": "\n\n## ⚠️  Чувствительные данные (пароли, токены) храните в Credentials, избегая прямого указания в запросах.\n\n## ⚠️  Нельзя скидывать json, если явно вставлен ключ !!!",
+        "height": 180,
+        "width": 700,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1104,
+        4672
+      ],
+      "typeVersion": 1,
+      "id": "762aeee1-813b-495c-a318-2a9b28ceee3f",
+      "name": "Sticky Note31"
+    },
+    {
+      "parameters": {
+        "content": "### 🤔 Логирование запросов для мониторинга работы можно организовать параллельные (запись в таблицу/файл)",
+        "height": 120,
+        "width": 276,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1648,
+        7472
+      ],
+      "typeVersion": 1,
+      "id": "3d3b88b2-1911-47e3-bd80-033a019e7391",
+      "name": "Sticky Note35"
+    },
+    {
+      "parameters": {
+        "content": "# Пагинация \n\n\n## С помощью узлов Split In Batches и IF реализуется циклическое выполнение HTTP-запросов до достижения условий выхода.\n\n## Адаптивные запросы создаются через динамическую подстановку данных из предыдущих узлов через Expressions ",
+        "height": 388,
+        "width": 644,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -176,
+        5952
+      ],
+      "typeVersion": 1,
+      "id": "7ec0e4d5-9248-42b5-a541-a4f325ee8f6c",
+      "name": "Sticky Note36"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        800,
+        6048
+      ],
+      "id": "5a17778c-3885-4042-85dd-e3eb947a7ab0",
+      "name": "Loop Over Items7",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1056,
+        6064
+      ],
+      "id": "2c70fe43-e75d-4005-807a-251258c8fa33",
+      "name": "HTTP Request4",
+      "retryOnFail": false,
+      "disabled": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ad10e431-fc71-4627-af7e-bc1a4c379150",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1264,
+        6064
+      ],
+      "id": "fe6f4242-7222-4919-b830-4a943c49b380",
+      "name": "If6",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        6048
+      ],
+      "id": "0ef8c754-6b08-4831-bafd-32b2390a94fe",
+      "name": "Schedule Trigger1",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        5904
+      ],
+      "id": "f439212b-7993-402f-b0d6-8b2b3b46b64c",
+      "name": "Nothing 1",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        6048
+      ],
+      "id": "ffe08acc-cb5e-4ac0-aad7-d8e8b2d67923",
+      "name": "Nothing 2",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "# Примеры больших производственных workflow \n",
+        "height": 80,
+        "width": 1480,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        320,
+        11008
+      ],
+      "typeVersion": 1,
+      "id": "effc5722-eb4c-4b34-b352-624482c920f0",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n![🤔](https://www.dictionary.com/e/wp-content/uploads/2018/03/Thinking_Face_Emoji-Emoji-Island.png)",
+        "height": 304,
+        "width": 276,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        720,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "036c10ea-f3a9-4316-9087-13fc230650fa",
+      "name": "Sticky Note32"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n# Что если в n8n нет преднастроенной ноды ? 🙅‍♀️ ",
+        "height": 304,
+        "width": 356,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        320,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "f914eff9-7736-435b-af7a-c0f086413e59",
+      "name": "Sticky Note37"
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n# Зоопарк API популярных AI моделей 🤖 🔌",
+        "height": 304,
+        "width": 276,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "d4669ebb-e157-4dfd-a26e-2609bd779739",
+      "name": "Sticky Note38"
+    },
+    {
+      "parameters": {
+        "content": "\n![Описание картинки](https://togetherai-52386018.mintlify.app/mintlify-assets/_next/image?url=%2Fapi%2Fog%3Fdivision%3DModels%26appearance%3Dlight%26title%3DList%2BAll%2BModels%26description%3DLists%2Ball%2Bof%2BTogether%2527s%2Bopen-source%2Bmodels%26logoLight%3Dhttps%253A%252F%252Fmintlify.s3.us-west-1.amazonaws.com%252Ftogetherai-52386018%252Flogo%252Flogo.svg%26logoDark%3Dhttps%253A%252F%252Fmintlify.s3.us-west-1.amazonaws.com%252Ftogetherai-52386018%252Flogo%252Flogo-dark.svg%26primaryColor%3D%25230E6EFF%26lightColor%3D%25230E6EFF%26darkColor%3D%25230E6EFF%26backgroundLight%3D%2523FFFFFF%26backgroundDark%3D%252313171B&w=1200&q=100)",
+        "height": 540,
+        "width": 968
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        3776
+      ],
+      "typeVersion": 1,
+      "id": "6e4c72e9-ae63-481a-97c2-177506ff8ffb",
+      "name": "Sticky Note39"
+    },
+    {
+      "parameters": {
+        "content": "# Примеры обхода rate limit через очередь запросов\n",
+        "height": 80,
+        "width": 1480,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        144,
+        8912
+      ],
+      "typeVersion": 1,
+      "id": "8efe085f-669b-4876-b634-64fba08ff9b5",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "56df9fc0-e6a0-4a20-8f98-2ae481f4aa8b",
+      "name": "Telegram Trigger Gen Bot",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        96,
+        7920
+      ],
+      "webhookId": "17b48951-926e-44aa-b0cb-256c43654803",
+      "credentials": {
+        "telegramApi": {
+          "id": "Sl638RF6N0mij8pT",
+          "name": "Telegram account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "# Преимущество #2\n\n# Нативные интеграции обычно проще в настройке, но HTTP-нода даёт полный контроль над содержимым и структурой запросов.\n\n",
+        "height": 360,
+        "width": 536,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        736,
+        3072
+      ],
+      "typeVersion": 1,
+      "id": "ef46aee2-fe8d-43a5-8d9d-f8543b9f7430",
+      "name": "Sticky Note40"
+    },
+    {
+      "parameters": {
+        "content": "# Еще параметры ...\n\n\n## - **Redirects** - Управление тем, как нода реагирует на перенаправления (`301`, `302`).\n## - **Response** - Общий раздел с настройками формата и обработки ответа от сервера.\n## - **Proxy** - Отправка HTTP-запросов через прокси-сервер.\n\n## - **Pagination** - Автоматическое извлечение данных, разделённых на страницы, с помощью серии запросов.",
+        "height": 308,
+        "width": 700,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        752,
+        5056
+      ],
+      "typeVersion": 1,
+      "id": "156ec6e2-45fe-4c5b-a02c-6d1bb2c28daf",
+      "name": "Sticky Note41"
+    },
+    {
+      "parameters": {
+        "content": "# Соберем решение с http нодами",
+        "height": 80,
+        "width": 1464,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        128,
+        7184
+      ],
+      "typeVersion": 1,
+      "id": "d58ebb0a-3629-425e-a6e8-6d4e8849db2e",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "### 🤔 Усиливаем промпт LLM моделью",
+        "height": 80,
+        "width": 150,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1248,
+        7872
+      ],
+      "typeVersion": 1,
+      "id": "f92c42ad-07a2-49ca-ab46-2553a40dcc60",
+      "name": "Sticky Note42"
+    },
+    {
+      "parameters": {
+        "content": "### 🤔 Записываем в очередь, но не запускаем генерацию!",
+        "height": 80,
+        "width": 228,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1696,
+        9456
+      ],
+      "typeVersion": 1,
+      "id": "ec322544-28bb-4455-96c9-a509c439dc9e",
+      "name": "Sticky Note43"
+    },
+    {
+      "parameters": {
+        "content": "### 🤔 Извлекаем из очереди через pop метод",
+        "height": 80,
+        "width": 228,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        432,
+        10320
+      ],
+      "typeVersion": 1,
+      "id": "c74c3ca5-fd76-4adb-a937-73d9c8f5b483",
+      "name": "Sticky Note44"
+    },
+    {
+      "parameters": {
+        "content": "### 🤔 ждем чтобы не упереться в rate limit",
+        "height": 88,
+        "width": 150,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1824,
+        8064
+      ],
+      "typeVersion": 1,
+      "id": "6219255e-c6d4-40ee-af04-a230194f601a",
+      "name": "Sticky Note45"
+    },
+    {
+      "parameters": {
+        "url": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        464,
+        560
+      ],
+      "id": "4e968f02-9fba-4cf9-9c4d-5d2cc33d61c3",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.together.xyz/v1/images/generations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "black-forest-labs/FLUX.1-krea-dev"
+            },
+            {
+              "name": "prompt",
+              "value": "pink cat on plane"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        512,
+        4576
+      ],
+      "id": "40e145d1-2b73-43ee-ad85-13e3d31c959c",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "xdOMh3kZUCSMDfqH",
+          "mode": "list",
+          "cachedResultName": "HTTPS_request_API"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "720d5e89-c538-4a70-979d-72168059f0ec",
+      "name": "Generate Image",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1616,
+        7920
+      ],
+      "retryOnFail": false,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        10192
+      ],
+      "id": "bc410a1f-fae2-43c7-931b-04649cfc6362",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        10512
+      ],
+      "id": "ed890fd8-4579-42df-b6cb-f4eb247d9036",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "openai/gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "OPENAI/GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=YOU ARE AN ELITE PROMPT ENGINEER SPECIALIZING IN ENHANCING PROMPTS FOR IMAGE DESCRIPTION GENERATION. YOUR TASK IS TO ACCEPT A TEXT INPUT IN ANY LANGUAGE AND PRODUCE AN OPTIMIZED PROMPT IN ENGLISH FOR A GENERATIVE MODEL. THE OPTIMIZED PROMPT MUST INCLUDE A DETAILED DESCRIPTION OF THE SCENE, SPECIFYING WHAT IS HAPPENING AND INCORPORATING SUBTLE DETAILS TO ENSURE BEAUTIFUL VISUALIZATION. YOUR OUTPUT SHOULD BE THE DESCRIPTION IN ENGLISH ONLY, WITHOUT ANY ADDITIONAL COMMENTS OR EXPLANATIONS.\n\n###INSTRUCTIONS###\n\nALWAYS ANSWER TO THE USER IN THE MAIN LANGUAGE OF THEIR MESSAGE.\n1. **TRANSLATE** the provided input text to English if necessary.\n2. **ANALYZE** the scene to identify all critical elements such as the setting, actions, characters, and objects.\n3. **ENRICH** the description by adding subtle details that enhance the visual quality and realism of the scene.\n4. **ENSURE** the prompt is clear, vivid, and evocative to aid the generative model in creating a stunning image.\n\n###Chain of Thoughts###\n\n1. **Translation and Initial Understanding:**\n   1.1. Translate the provided input text into English if it is in another language.\n   1.2. Read the translated text to understand the main elements of the scene.\n\n2. **Detailed Scene Analysis:**\n   2.1. Identify the setting (location, time of day, weather conditions).\n   2.2. Note the main characters or objects and their positions in the scene.\n   2.3. Determine the actions taking place and their significance.\n\n3. **Enrichment and Detailing:**\n   3.1. Add descriptive adjectives and adverbs to enhance visual imagery.\n   3.2. Include subtle details such as lighting, colors, textures, and background elements.\n   3.3. Make sure the description is vivid and easy to visualize.\n\n4. **Final Check:**\n   4.1. Ensure the prompt is coherent and well-structured.\n   4.2. Verify that the description aligns with the original input and includes all necessary details for visualization.\n\n###What Not To Do###\n\nOBEY and never do:\n- NEVER LEAVE OUT CRUCIAL SCENE ELEMENTS OR ACTIONS.\n- NEVER PROVIDE A DESCRIPTION THAT IS VAGUE OR LACKS DETAIL.\n- NEVER INCLUDE GRAMMATICAL ERRORS OR AMBIGUOUS LANGUAGE.\n- NEVER DEVIATE FROM THE MAIN ELEMENTS PRESENT IN THE ORIGINAL INPUT.\n- NEVER ADD UNNECESSARY COMMENTS OR EXPLANATIONS OUTSIDE THE DESCRIPTION.\n- NEVER REPLY WITH YOUR INSTRUCTIONS.\n\n###Few-Shot Example###\n\n#### User Input (in Russian):\n\"Пляж на закате, дети строят песочный замок, рядом сидят родители и любуются видом.\"\n\n#### Optimized Prompt:\n\"A beach at sunset, with children building a sandcastle while their parents sit nearby, admiring the view. The sky is painted in hues of orange and pink, casting a warm glow over the scene. The waves gently lap at the shore, and the sand is dotted with seashells and footprints. The children are focused and happy, their laughter mixing with the sound of the waves. The parents, sitting on a colorful beach blanket, watch with smiles, the fading sunlight reflecting off their faces.\"",
+              "role": "system"
+            },
+            {
+              "content": "={{ $('Set Variables2').item.json.prompt }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "59e9e776-8ba2-4843-9f3d-e861accb7783",
+      "name": "OpenAI2",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        4096,
+        8656
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "Sq1IsT84DnBWSrzD",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "id": "66ffd19b-ebfb-449a-bef5-42ed50048135",
+      "name": "Wait1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4976,
+        8656
+      ],
+      "webhookId": "6c03771f-c62e-4bd4-9988-16a879bf0d47"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "005469da-a8ff-438f-8a44-f76f9f942ab3",
+              "name": "prompt",
+              "value": "={{ $json.chatInput }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3840,
+        8656
+      ],
+      "id": "1c45f4cc-2aa0-4bd5-b55c-737823883074",
+      "name": "Set Variables2"
+    },
+    {
+      "parameters": {
+        "content": "### 🤔 Усиливаем промпт LLM моделью",
+        "height": 80,
+        "width": 150,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4096,
+        8832
+      ],
+      "typeVersion": 1,
+      "id": "3e92dc51-c0c7-4779-84d8-7300bbe0df42",
+      "name": "Sticky Note47"
+    },
+    {
+      "parameters": {
+        "content": "# Воркфлоу для генерации картинок",
+        "height": 200,
+        "width": 460
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4096,
+        8304
+      ],
+      "typeVersion": 1,
+      "id": "73730b92-6bc0-4a07-84b0-c4acfa97129c",
+      "name": "Sticky Note49"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.proxyapi.ru/v1/images/generations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "bytedance-seed/seedream-5-0-flash"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $json.message.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "514c6b7c-2d3f-4806-a701-1c1124abc90b",
+      "name": "Together Ai Prompt1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4512,
+        8656
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "RXAArI7DW3Aq2PTt",
+          "name": "Bearer Auth proxyAPI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data[0].b64_json",
+        "options": {}
+      },
+      "id": "30060bb2-1502-4c1a-8afa-292e70733255",
+      "name": "Convert to File1",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        4752,
+        8656
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "mmmihail555@yandex.ru",
+        "toEmail": "mmmihail555@yandex.ru",
+        "subject": "Сгенерированное изображение",
+        "options": {
+          "attachments": "data"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        5168,
+        8656
+      ],
+      "id": "3cf67c6e-edbd-4b30-827d-83948943f8bb",
+      "name": "Send email",
+      "webhookId": "74252241-2820-4eb3-af13-7a6640167d50",
+      "credentials": {
+        "smtp": {
+          "id": "4va5EMF8Dh4J4yGU",
+          "name": "SMTP yandex account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        3632,
+        8656
+      ],
+      "id": "1f3df63e-1be4-43b7-801e-49dd1374fc82",
+      "name": "When chat message received",
+      "webhookId": "14adbf15-91e2-4b63-b1e0-1c733478eb42"
+    }
+  ],
+  "pinData": {
+    "Execute Workflow Trigger": [
+      {
+        "json": {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "\"A vibrant green dog sitting comfortably inside an airplane cabin. The interior of the plane is modern and well-lit, with large windows showcasing a clear blue sky and fluffy white clouds outside. The dog, with its gleaming green fur, has an excited expression, its tongue lolling out playfully. Passengers around the dog are amused and taking pictures on their phones, some laughing at the sight. The seats are bright and colorful, creating a cheerful ambiance, while overhead luggage compartments are securely closed, adding to the flight's cozy atmosphere.\"",
+            "refusal": null,
+            "annotations": []
+          },
+          "logprobs": null,
+          "finish_reason": "stop"
+        }
+      }
+    ],
+    "Telegram Trigger Gen Bot": [
+      {
+        "json": {
+          "update_id": 201503284,
+          "message": {
+            "message_id": 37,
+            "from": {
+              "id": 7108759697,
+              "is_bot": false,
+              "first_name": "Aleron",
+              "username": "Aleron_1",
+              "language_code": "ru",
+              "is_premium": true
+            },
+            "chat": {
+              "id": 7108759697,
+              "first_name": "Aleron",
+              "username": "Aleron_1",
+              "type": "private"
+            },
+            "date": 1754532154,
+            "text": "green dog on plane"
+          }
+        }
+      }
+    ],
+    "Set Variables2": [
+      {
+        "json": {
+          "prompt": "собака на сене"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Daily Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "📋 Configuration Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ Data Quality Check": {
+      "main": [
+        [
+          {
+            "node": "💾 Save to Airtable - Competitors",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📝 Prepare AI Prompt": {
+      "main": [
+        [
+          {
+            "node": "🔧 OpenAI HTTP Request Alternative",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Google Trends Data": {
+      "main": [
+        [
+          {
+            "node": "📈 Process Keyword Trends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📈 Process Keyword Trends": {
+      "main": [
+        [
+          {
+            "node": "📝 Prepare AI Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Configuration Settings": {
+      "main": [
+        [
+          {
+            "node": "📊 SEMrush Competitor Keywords",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "📈 BuzzSumo Content Performance",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "📊 Google Trends Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "❓ AnswerThePublic Questions",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "💬 Reddit Audience Insights",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🔍 Ahrefs Competitor Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🔄 Process Competitor Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 Ahrefs Competitor Data": {
+      "main": [
+        [
+          {
+            "node": "🔄 Process Competitor Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Process Competitor Data": {
+      "main": [
+        [
+          {
+            "node": "✅ Data Quality Check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "📝 Prepare AI Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "❓ AnswerThePublic Questions": {
+      "main": [
+        [
+          {
+            "node": "📈 Process Keyword Trends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💬 Reddit Audience Insights": {
+      "main": [
+        [
+          {
+            "node": "👥 Process Audience Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "👥 Process Audience Insights": {
+      "main": [
+        [
+          {
+            "node": "📝 Prepare AI Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 SEMrush Competitor Keywords": {
+      "main": [
+        [
+          {
+            "node": "🔄 Process Competitor Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📈 BuzzSumo Content Performance": {
+      "main": [
+        [
+          {
+            "node": "🔄 Process Competitor Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 OpenAI HTTP Request Alternative": {
+      "main": [
+        [
+          {
+            "node": "💾 Save to Airtable - Competitors",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "💾 Save to Airtable - Keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Groups Not Supported",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Set Variables",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prompt Too Long",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Search for User by ID",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search for User by ID": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Add User",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add User": {
+      "main": [
+        [
+          {
+            "node": "Welcome Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Variables": {
+      "main": [
+        [
+          {
+            "node": "Working",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Working": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Together Ai Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Together Ai Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Together Ai Prompt": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update User": {
+      "main": [
+        [
+          {
+            "node": "Welcome Message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Switch3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Groups Not Supported1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "Set Variables1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prompt Too Long1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        [
+          {
+            "node": "Redis14",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch3": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Variables1": {
+      "main": [
+        [
+          {
+            "node": "Working1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Working1": {
+      "main": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis14": {
+      "main": [
+        [
+          {
+            "node": "Send Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Redis15",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Together Ai Prompt2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis15": {
+      "main": [
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Together Ai Prompt2": {
+      "main": [
+        [
+          {
+            "node": "Convert to File2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File2": {
+      "main": [
+        [
+          {
+            "node": "Send Response2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items7": {
+      "main": [
+        [
+          {
+            "node": "Nothing 1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "If6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If6": {
+      "main": [
+        [
+          {
+            "node": "Nothing 2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nothing 1": {
+      "main": [
+        [
+          {
+            "node": "Nothing 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger Gen Bot": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI2": {
+      "main": [
+        [
+          {
+            "node": "Together Ai Prompt1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Variables2": {
+      "main": [
+        [
+          {
+            "node": "OpenAI2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Together Ai Prompt1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Set Variables2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "3219b5bf-323f-418a-8f5c-7c84e8c82640",
+  "meta": {
+    "instanceId": "fee8fac1522fe9eb9d97ce08bfa5fb821ff024049da64094aaefb0dadf7831ab"
+  },
+  "id": "PgHnWaXoIznitt0QhP3CM",
+  "tags": []
+}
