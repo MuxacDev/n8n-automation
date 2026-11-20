@@ -1,0 +1,3581 @@
+{
+  "name": "Telegram_full_guide",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=Ты добрый ассистент для знакомства людей. Ниже инструкция, с описанием твоей деятельности. Чтобы ты мог информировать людей:\n\nЭтот бот поможет вам участвовать в программе \"Случайный Кофе\". Он автоматически подбирает вам собеседника для неформальных встреч каждую неделю.\n\nКак это работает:\n1. Вы регистрируетесь в боте. Указываете свое имя и краткую информацию. \n2. Каждый понедельник бот находит вам нового собеседника из числа участников.\n3. Вы получаете контактные данные собеседника и можете договориться о встрече.\n4. В конце недели бот спросит, состоялась ли встреча, и хотите ли вы продолжить участие.\n5. Участие бесплатное. \n\nЕсли вы хотите перестать участвовать, измените свой статус с помощью команды /settings.\n\nЭто отличный способ расширить круг знакомств и пообщаться с интересными людьми!\n\nТекущая дата и время для ориентации во времени: {{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -2736,
+        -2160
+      ],
+      "id": "fa323162-b12b-4f02-9fab-397df4ac00b6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseFormat": "text"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.1,
+      "position": [
+        -2800,
+        -1904
+      ],
+      "id": "2deeea3a-85cf-4454-97e0-b2fad0ec5ac8",
+      "name": "OpenAI Chat Model",
+      "notesInFlow": false,
+      "credentials": {
+        "openAiApi": {
+          "id": "WeINvsore1TpvdSm",
+          "name": "OpenAi Aleron key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -5424,
+        -2160
+      ],
+      "id": "f37dc4b7-6ead-4185-ba95-d24ff5682603",
+      "name": "Receive Message",
+      "webhookId": "bffb7502-df2f-46df-b8e4-90d7f1647730",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Receive Message').item.json.message.chat.id }}",
+        "text": "={{ $('Edit Fields1').item.json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2384,
+        -2160
+      ],
+      "id": "d98c40b1-fb2e-47b8-9a17-b4f501aacb97",
+      "name": "Reply Text",
+      "webhookId": "be561cac-5535-48d4-8382-ff1e21cd3984",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Receive Message').item.json.message.from.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -2656,
+        -1904
+      ],
+      "id": "2582b7c6-cf62-4f56-b628-302290c84159",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $('Receive Message').item.json.message.chat.id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -3056,
+        -2160
+      ],
+      "id": "a44e9b97-d521-4a25-96e5-b1a1b07ae81f",
+      "name": "Send a chat action",
+      "webhookId": "dec4a295-193d-4564-a1ba-a48541974fc9",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "daysInterval": 7,
+              "triggerAtHour": 11
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -5328,
+        912
+      ],
+      "id": "6bf675f4-36d0-4e5f-8b4a-aeccf22a2099",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE",
+          "mode": "list",
+          "cachedResultName": "random_coffe_bot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "Active"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -5040,
+        912
+      ],
+      "id": "1c1d3930-eb0e-4d12-8bec-ec9371a9dfaf",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0Xqc38trW9bfn5MI",
+          "name": "Google Sheets Aleron"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "import random\n\ndef run_node_code(items):\n    users = []\n    for item in items:\n      user_data = {\n              'id': item.json.get('tg_id', ''),\n              'chat_id': item.json.get('tg_id', ''),\n              'info': item.json.get('info', ''),\n              'lastPairedWith': item.json.get('Last_paired_with', None),\n          }\n      users.append(user_data)\n\n    random.shuffle(users)\n\n    pairs = []\n    unpaired_users = list(users)\n    while len(unpaired_users) >= 2:\n        user1 = unpaired_users.pop(0)\n\n        user2_index = -1\n        for i, u2 in enumerate(unpaired_users):\n            if u2['id'] != user1['lastPairedWith']:\n                user2_index = i\n                break\n\n        if user2_index != -1:\n            user2 = unpaired_users.pop(user2_index)\n            pairs.append([user1, user2])\n        elif len(unpaired_users) > 0:\n            user2 = unpaired_users.pop(0)\n            pairs.append([user1, user2])\n        else:\n            pass\n\n    output_items = []\n    for pair in pairs:\n        output_items.append({\n            'json': {\n                'user1': pair[0],\n                'user2': pair[1]\n            }\n        })\n\n    if not output_items:\n        output_items.append({'json': {}})\n    return output_items\n\n\n# print(_input.all())\n\nreturn run_node_code(_input.all())"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4752,
+        912
+      ],
+      "id": "875497f2-ebf6-4ba4-b636-5f5d427d3c19",
+      "name": "Code",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -4448,
+        912
+      ],
+      "id": "d3401a41-7ba7-4360-b429-3f2c707586a7",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "daysInterval": 7,
+              "triggerAtHour": 19
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -5296,
+        2112
+      ],
+      "id": "c3c58243-61f6-44a7-855c-829d87baa586",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE",
+          "mode": "list",
+          "cachedResultName": "random_coffe_bot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "Active"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -5040,
+        2112
+      ],
+      "id": "7a08175b-c42b-4154-b749-2e72ad6e412d",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0Xqc38trW9bfn5MI",
+          "name": "Google Sheets Aleron"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -4720,
+        2112
+      ],
+      "id": "11ecee9f-5366-48cc-a706-e6336d2ece3e",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.tg_id }}",
+        "text": "Продолжаешь на следующей неделе?",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Да",
+                    "additionalFields": {
+                      "callback_data": "status2active"
+                    }
+                  },
+                  {
+                    "text": "Нет",
+                    "additionalFields": {
+                      "callback_data": "status2inactive"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -4480,
+        2128
+      ],
+      "id": "3d69ba63-c95c-41bf-b8a5-ea1505ab5450",
+      "name": "Send a text message2",
+      "webhookId": "2d9197c8-0249-4958-8048-fb4dd5fa0bb0",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "# 🤗  Регистрируем нового человека + обработка сообщений\n\n\n",
+        "width": 440
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -5968,
+        -2176
+      ],
+      "id": "3ff6589e-ba38-4448-a538-3aaa0e2fc2b0",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# 🚀  Запускаем мэчинг людей в начале недели \n\n\n",
+        "height": 140,
+        "width": 440,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -5984,
+        880
+      ],
+      "id": "f1a55f48-ed31-4991-aa11-557a77ddb37c",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# 🏁   В конце недели cобираем фидбек и обновляем статусы ✅\n\n\n\n\n",
+        "height": 180,
+        "width": 440,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -5936,
+        2080
+      ],
+      "id": "ea1f9ed2-30c4-4bd8-b96c-19eebd92a8f5",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -3648,
+        -1856
+      ],
+      "id": "4955b362-e98e-47cb-9ceb-fbe93ecac81f",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "WeINvsore1TpvdSm",
+          "name": "OpenAi Aleron key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3360,
+        -2160
+      ],
+      "id": "094b023b-4551-425e-84e6-fc9cb4387b85",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "dsdf a",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -3920,
+        -1856
+      ],
+      "id": "42bb65c9-3d4f-48fa-b853-10f589c86fd7",
+      "name": "Get a file",
+      "webhookId": "b2a91c03-afb8-4132-ab6d-a224791f12d6",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Params1').item.json.tg.user_id }}",
+        "text": "Введите информацию о себе",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -4096,
+        -608
+      ],
+      "id": "46077d82-2dc4-4f9e-9f95-541fe7940dfe",
+      "name": "Запрос инфо о себе",
+      "webhookId": "f3e32cee-60a1-4ed9-a492-290b3cf209fb",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3a3b6371-90a1-4fb8-8091-90ff68b1d9fc",
+                    "leftValue": "={{ $json.user_state }}",
+                    "rightValue": "=fill_info_start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "fill_info_start"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a720f388-9515-4df9-a24f-f972dc2f562e",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "other"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -4768,
+        -2160
+      ],
+      "id": "a76f612b-a2d4-4d2b-aa9c-7bd51ac0f9c2",
+      "name": "SwitchState"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $('Receive Message').item.json.message.chat.id }}.state",
+        "value": "base"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4160,
+        -2928
+      ],
+      "id": "4e986a51-41b9-408c-98ee-48fb6626e836",
+      "name": "RedisSetBaseState",
+      "credentials": {
+        "redis": {
+          "id": "cOfuJ7yNM9fdHCnZ",
+          "name": "Redis DB for user state"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d920edfa-bd82-4645-b8ba-5d69566f689a",
+              "name": "=tg.user_id",
+              "value": "={{ $json.message?.from?.id || $json.callback_query?.from?.id }}",
+              "type": "string"
+            },
+            {
+              "id": "9d5a4d00-59af-4bc4-bf7f-5abca9f9ca0a",
+              "name": "tg.first_name",
+              "value": "={{ $json.message?.from?.first_name || $json.callback_query?.from?.first_name }}",
+              "type": "string"
+            },
+            {
+              "id": "e821095e-2173-428b-aeb7-1ab93a028a3e",
+              "name": "tg.username",
+              "value": "={{ $json.message?.from?.username || $json.callback_query?.from?.username }}",
+              "type": "string"
+            },
+            {
+              "id": "55c05b7a-defc-4dab-8c82-71db476e96f9",
+              "name": "tg.text",
+              "value": "={{$json.message?.text || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "214f3f64-7bd0-44c9-996f-21b04c678a6a",
+              "name": "tg.entities",
+              "value": "={{ $json.message?.entities[0]?.type || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "5c88ac5a-de65-4ef9-b963-c1bb16ed5cdd",
+              "name": "tg.callback_data",
+              "value": "={{ $json.callback_query?.message?.reply_markup?.inline_keyboard[0][0]?.callback_data || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5200,
+        -2160
+      ],
+      "id": "047a3c70-8d0e-4779-951d-3c79cf294f83",
+      "name": "Params"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{  $('Params1').item.json.tg.user_id}}.state",
+        "value": "fill_info_start"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4336,
+        -608
+      ],
+      "id": "a89f0539-40aa-4378-bb9b-9a8be0d68aed",
+      "name": "Set State = fill_info_start",
+      "credentials": {
+        "redis": {
+          "id": "cOfuJ7yNM9fdHCnZ",
+          "name": "Redis DB for user state"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Receive Message').item.json.message.chat.id }}",
+        "text": "Спасибо! Информация о вас обновлена!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -3888,
+        -2928
+      ],
+      "id": "95db68cf-af96-47d6-8023-77b7debce4bf",
+      "name": "\"Спасибо!\"",
+      "webhookId": "f3e32cee-60a1-4ed9-a492-290b3cf209fb",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Params').item.json.tg.user_id }}",
+        "text": "Для начала, заполните анкету.",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Перейти к заполнению анкеты",
+                    "additionalFields": {
+                      "callback_data": "fill_info_start"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2864,
+        -2880
+      ],
+      "id": "a80bc31a-213e-4914-8d98-130b8c3c2e63",
+      "name": "\"Заполните анкету + кнопка\"",
+      "webhookId": "f3e32cee-60a1-4ed9-a492-290b3cf209fb",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Receive Message').item.json.message.text }}",
+                    "rightValue": "/start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "bbaba653-1517-46a7-87c4-c5a10bbf0a25"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "/start"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3061c44b-f7ac-42c8-97a3-c45615f35023",
+                    "leftValue": "={{  $('Receive Message').item.json.message.text  }}",
+                    "rightValue": "/settings",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "/settings"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0e8cfcc0-d7ae-442d-9ff5-5030ab71e994",
+                    "leftValue": "={{  $('Receive Message').item.json.message.text  }}",
+                    "rightValue": "/help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "/help"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -3424,
+        -2704
+      ],
+      "id": "63e26cbc-6065-4adb-abb7-178590531f1d",
+      "name": "SwitchCommands"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Params').item.json.tg.entities }}",
+                    "rightValue": "bot_command",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "67202a23-2d89-4f9f-a6a3-8f1c56f30068"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "bot_command"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "973fa2b0-c3d1-4ca8-bc34-1228730f3a99",
+                    "leftValue": "={{ $('Receive Message').item.json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b38e73bb-31f8-4350-b1ad-2620df111d50",
+                    "leftValue": "={{ $('Receive Message').item.json.message.photo }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "photo"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "19671e94-355d-43ce-bba0-e3086fb81b2b",
+                    "leftValue": "={{ $('Receive Message').item.json.message.audio }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -4304,
+        -2160
+      ],
+      "id": "48a5bd99-77f8-4718-a712-4735aaa55b86",
+      "name": "SwitchTgEntities"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "user_state",
+        "key": "={{ $json.tg.user_id }}.state",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4976,
+        -2160
+      ],
+      "id": "e05a41ba-fa77-482e-987c-d3b6aa4cf10e",
+      "name": "GetInitialState",
+      "credentials": {
+        "redis": {
+          "id": "cOfuJ7yNM9fdHCnZ",
+          "name": "Redis DB for user state"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -5376,
+        -368
+      ],
+      "id": "f5d3afd9-1b2e-4489-bc1b-33eb9c79337e",
+      "name": "Receive Callback",
+      "webhookId": "bffb7502-df2f-46df-b8e4-90d7f1647730",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d920edfa-bd82-4645-b8ba-5d69566f689a",
+              "name": "=tg.user_id",
+              "value": "={{ $json.message?.from?.id || $json.callback_query?.from?.id }}",
+              "type": "string"
+            },
+            {
+              "id": "9d5a4d00-59af-4bc4-bf7f-5abca9f9ca0a",
+              "name": "tg.first_name",
+              "value": "={{ $json.message?.from?.first_name || $json.callback_query?.from?.first_name }}",
+              "type": "string"
+            },
+            {
+              "id": "e821095e-2173-428b-aeb7-1ab93a028a3e",
+              "name": "tg.username",
+              "value": "={{ $json.message?.from?.username || $json.callback_query?.from?.username }}",
+              "type": "string"
+            },
+            {
+              "id": "55c05b7a-defc-4dab-8c82-71db476e96f9",
+              "name": "tg.text",
+              "value": "={{$json.message?.text || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "214f3f64-7bd0-44c9-996f-21b04c678a6a",
+              "name": "tg.entities",
+              "value": "={{ $json.message?.entities[0]?.type || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "5c88ac5a-de65-4ef9-b963-c1bb16ed5cdd",
+              "name": "tg.callback_data",
+              "value": "={{ $json.callback_query?.message?.reply_markup?.inline_keyboard[0][0]?.callback_data || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5168,
+        -368
+      ],
+      "id": "9dc10fcc-897f-44ca-a42f-7513f380d84b",
+      "name": "Params1"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "user_state",
+        "key": "={{ $json.tg.user_id }}.state",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4944,
+        -368
+      ],
+      "id": "d45d5709-957c-45ce-a0d8-d81ecd9e1f4b",
+      "name": "GetInitialState1",
+      "credentials": {
+        "redis": {
+          "id": "cOfuJ7yNM9fdHCnZ",
+          "name": "Redis DB for user state"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/bot7838601458:AAHo2br8Vv00dklF2Bpcj8aBggwLCWFr1Qw/setMyCommands",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"commands\": [\n    {\n      \"command\": \"start\",\n      \"description\": \"Запустить бота\"\n    },\n    {\n      \"command\": \"settings\",\n      \"description\": \"Настройки\"\n    },\n    {\n      \"command\": \"help\",\n      \"description\": \"Помощь\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3104,
+        -2704
+      ],
+      "id": "2331ee15-6856-4443-bc51-ec4fdfc8762a",
+      "name": "SetCommands"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Params1').item.json.tg.callback_data }}",
+                    "rightValue": "fill_info_start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b2140768-d68a-453e-8960-fc46b39e7cef"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "fill_info_start"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d2a058e0-8f8b-4ccd-a7be-9f0045c11fa3",
+                    "leftValue": "={{ $('Receive Callback').item.json.callback_query.data }}",
+                    "rightValue": "status2active",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "status2active"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e6a69705-cc27-4f49-b007-fe77f75bb34a",
+                    "leftValue": "={{ $('Receive Callback').item.json.callback_query.data }}",
+                    "rightValue": "status2inactive",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "status2inactive"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -4720,
+        -368
+      ],
+      "id": "f4c0cc4d-07ae-4531-8fe3-0a318ebd6269",
+      "name": "SwitchCallback"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Params1').item.json.tg.user_id }}",
+        "text": "Обновили ваш статус",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -4096,
+        -304
+      ],
+      "id": "fb34ab66-0ae0-4cc0-a2e7-2b973900b2f5",
+      "name": "Запрос инфо о себе1",
+      "webhookId": "f3e32cee-60a1-4ed9-a492-290b3cf209fb",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# ⚙️   Обработка событий при нажатии кнопок в боте \n\n\n",
+        "width": 420,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -6000,
+        -384
+      ],
+      "id": "01c384d7-2541-478c-9d9f-2b1363448510",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE",
+          "mode": "list",
+          "cachedResultName": "random_coffe_bot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [
+            "tg_id"
+          ],
+          "schema": [
+            {
+              "id": "tg_id",
+              "displayName": "tg_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nickname",
+              "displayName": "nickname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "info",
+              "displayName": "info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "start_date",
+              "displayName": "start_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last_paired_with",
+              "displayName": "Last_paired_with",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -3840,
+        1104
+      ],
+      "id": "626a138c-abfb-4256-871c-e8d0edad008d",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0Xqc38trW9bfn5MI",
+          "name": "Google Sheets Aleron"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE",
+          "mode": "list",
+          "cachedResultName": "random_coffe_bot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "=Active",
+            "tg_id": "={{ $('Get row(s) in sheet').item.json.tg_id }}",
+            "Last_paired_with": "={{ $('Get row(s) in sheet').item.json.Last_paired_with }}"
+          },
+          "matchingColumns": [
+            "tg_id"
+          ],
+          "schema": [
+            {
+              "id": "tg_id",
+              "displayName": "tg_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nickname",
+              "displayName": "nickname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "info",
+              "displayName": "info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "start_date",
+              "displayName": "start_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last_paired_with",
+              "displayName": "Last_paired_with",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -3840,
+        912
+      ],
+      "id": "0d2e7535-f70a-487a-af4d-571f87c63703",
+      "name": "Update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0Xqc38trW9bfn5MI",
+          "name": "Google Sheets Aleron"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.user1.id }}",
+        "text": "Вот ваша пара на эту неделю",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -4096,
+        928
+      ],
+      "id": "b2e3d2bd-6085-41d6-8537-62536f477abe",
+      "name": "Пишем первому",
+      "webhookId": "2d9197c8-0249-4958-8048-fb4dd5fa0bb0",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.user2 }}",
+        "text": "s",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -4096,
+        1120
+      ],
+      "id": "474fba0e-f771-4ee7-8c28-a70c94d26477",
+      "name": "Пишем второму",
+      "webhookId": "2d9197c8-0249-4958-8048-fb4dd5fa0bb0",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE",
+          "mode": "list",
+          "cachedResultName": "random_coffe_bot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tg_id": "={{ $json.result.chat.id }}"
+          },
+          "matchingColumns": [
+            "tg_id"
+          ],
+          "schema": [
+            {
+              "id": "tg_id",
+              "displayName": "tg_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nickname",
+              "displayName": "nickname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "info",
+              "displayName": "info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "start_date",
+              "displayName": "start_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last_paired_with",
+              "displayName": "Last_paired_with",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -3968,
+        2112
+      ],
+      "id": "ddd8a785-bdc9-4989-8adb-47ac64e862b5",
+      "name": "Update row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0Xqc38trW9bfn5MI",
+          "name": "Google Sheets Aleron"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "### 🤔  Что делать в случае ошибки?",
+        "height": 80,
+        "width": 160,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -4128,
+        768
+      ],
+      "id": "cd33e4a2-4b22-4ac5-bb91-936c816c0a04",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "###  🤔  Как подключить бд и хранить состояние?",
+        "height": 100,
+        "width": 160,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -5024,
+        -2304
+      ],
+      "id": "237852c9-46e4-4ed9-af40-5d7ad39486e6",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "### 🤔  Если механика сложная и n8n недостаточно",
+        "height": 100,
+        "width": 180,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -4784,
+        768
+      ],
+      "id": "7ad4ecd7-fa62-4449-bf4f-2477c71a651b",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "### 🤔  Как подключить бд и хранить состояния?",
+        "height": 100,
+        "width": 180,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -4976,
+        -496
+      ],
+      "id": "da201c4f-95e3-4513-873f-2eb8b257cfc9",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "### 🤔  Что делать в случае файлов (аудио)?",
+        "height": 80,
+        "width": 180,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -3824,
+        -2224
+      ],
+      "id": "9e24f4e9-12b7-42b5-addf-9ec2631970a2",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -3648,
+        -2064
+      ],
+      "id": "70b50d3b-d60a-4c14-afec-fb9e06698d57",
+      "name": "Analyze image",
+      "credentials": {
+        "openAiApi": {
+          "id": "WeINvsore1TpvdSm",
+          "name": "OpenAi Aleron key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "daf",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -3920,
+        -2064
+      ],
+      "id": "6684bd70-1edc-43e3-92b2-95512c28b85f",
+      "name": "Get a file1",
+      "webhookId": "b2a91c03-afb8-4132-ab6d-a224791f12d6",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Params').item.json.tg.user_id }}",
+        "text": "Для начала, заполните анкету.",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Настройка 1",
+                    "additionalFields": {
+                      "callback_data": "set_1"
+                    }
+                  },
+                  {
+                    "text": "Настройка 2",
+                    "additionalFields": {
+                      "callback_data": "set_2"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -3136,
+        -2496
+      ],
+      "id": "8f2238f8-8f64-49fe-9b79-2eb841b62ee8",
+      "name": "\"Вот инструкция ...\"",
+      "webhookId": "f3e32cee-60a1-4ed9-a492-290b3cf209fb",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Params').item.json.tg.user_id }}",
+        "text": "Для начала, заполните анкету.",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Настройка 1",
+                    "additionalFields": {
+                      "callback_data": "set_1"
+                    }
+                  },
+                  {
+                    "text": "Настройка 2",
+                    "additionalFields": {
+                      "callback_data": "set_2"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2864,
+        -2496
+      ],
+      "id": "d67d8b1e-24a0-48a9-9eee-64b6e88dd6df",
+      "name": "Кнопка смена статуса",
+      "webhookId": "f3e32cee-60a1-4ed9-a492-290b3cf209fb",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### 🤔  Что если вашего метода нет в n8n?",
+        "height": 80,
+        "width": 180,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2896,
+        -2688
+      ],
+      "id": "d1b3419c-32a8-4d67-9642-305a793889cf",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "### 🤔  Всю информацию так же храним в sheet для удобства",
+        "height": 80,
+        "width": 200,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -4480,
+        -3040
+      ],
+      "id": "4529d3f7-c1a0-42c2-8663-e30959348fd7",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "### 🤔  А что делать в случае ошибок?",
+        "height": 80,
+        "width": 180,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2720,
+        -2304
+      ],
+      "id": "c8d587e6-e544-4092-8516-c27e59b6d910",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "# 💌   Страхуемся предупреждением от ошибок в workflow \n\n\n\n\n",
+        "height": 180,
+        "width": 440,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -5984,
+        2992
+      ],
+      "id": "79f4b136-2411-47a0-a73f-6cbe2a720b13",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE",
+          "mode": "list",
+          "cachedResultName": "random_coffe_bot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tg_id": "={{ $('Params1').item.json.tg.user_id }}",
+            "status": "Active"
+          },
+          "matchingColumns": [
+            "tg_id"
+          ],
+          "schema": [
+            {
+              "id": "tg_id",
+              "displayName": "tg_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nickname",
+              "displayName": "nickname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "info",
+              "displayName": "info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "start_date",
+              "displayName": "start_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last_paired_with",
+              "displayName": "Last_paired_with",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -4320,
+        -400
+      ],
+      "id": "cb0c812f-b36d-42d6-b0a9-0493b2e9675d",
+      "name": "Ставим статус Active",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0Xqc38trW9bfn5MI",
+          "name": "Google Sheets Aleron"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE",
+          "mode": "list",
+          "cachedResultName": "random_coffe_bot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tg_id": "={{ $('Params1').item.json.tg.user_id }}",
+            "status": "Inactive"
+          },
+          "matchingColumns": [
+            "tg_id"
+          ],
+          "schema": [
+            {
+              "id": "tg_id",
+              "displayName": "tg_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nickname",
+              "displayName": "nickname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "info",
+              "displayName": "info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "start_date",
+              "displayName": "start_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last_paired_with",
+              "displayName": "Last_paired_with",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -4320,
+        -224
+      ],
+      "id": "dbdb2d4e-9f40-4995-bdb4-1d004d154a35",
+      "name": "Ставим статус Inactive",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0Xqc38trW9bfn5MI",
+          "name": "Google Sheets Aleron"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# 💰   А как же оплаты?\n\n## - Настроить ссылки на оплату\n## - Добавить доп. поле в Redis\n## - Принимать оплаты по webhook\n\n\n\n\n",
+        "height": 240,
+        "width": 520,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -6000,
+        3840
+      ],
+      "id": "19776bd2-2af8-4eb8-b5e5-b31020ee68f9",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -5344,
+        3024
+      ],
+      "id": "b9238aa9-4931-42ce-9340-16fe176d8a10",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "chatId": "342414",
+        "text": "Всем сломалось, беги чинить! ",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -5056,
+        3024
+      ],
+      "id": "15654ea5-3368-44db-a120-6a94653406ac",
+      "name": "Send a text message1",
+      "webhookId": "f9bef07f-2751-4640-ab6f-17f3f924e82b",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "dd989299-8b8f-44c9-9433-66efe2ad3e23",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -5328,
+        3920
+      ],
+      "id": "1cfc62ec-03cc-4fce-a43b-58bbfa1375bf",
+      "name": "Webhook",
+      "webhookId": "dd989299-8b8f-44c9-9433-66efe2ad3e23",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "payment",
+        "value": "true"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4864,
+        3920
+      ],
+      "id": "dedb15a5-1cd1-45bf-b4d9-6bebe83b0187",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "cOfuJ7yNM9fdHCnZ",
+          "name": "Redis DB for user state"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# 🤗  Регистрируем нового человека при старте бота \n\n\n",
+        "height": 200,
+        "width": 420
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -5360,
+        -4688
+      ],
+      "id": "240dbb04-c690-4521-bfa1-431b83b9bec1",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "# ⚙️   Обработка событий при нажатие на кнопки в боте \n\n\n",
+        "height": 200,
+        "width": 420,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -4864,
+        -4688
+      ],
+      "id": "c53ad3e9-82c3-43b5-9b16-68425f4ed028",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "# 🚀  Запускаем мэчинг людей в начале недели \n\n\n",
+        "height": 200,
+        "width": 420,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -4368,
+        -4688
+      ],
+      "id": "604ef0e3-329c-4c5e-8345-7b4496cb4fed",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "# 🏁   В конце недели cобираем фидбек и обновляем статусы ✅\n\n\n\n\n",
+        "height": 200,
+        "width": 420,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -5360,
+        -4384
+      ],
+      "id": "61cedb54-6c83-402a-a235-2c6d492a44d9",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "content": "# 💌   Страхуемся предупреждением при ошибках workflow \n\n\n\n\n",
+        "height": 200,
+        "width": 420,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -4864,
+        -4384
+      ],
+      "id": "585569cd-8cb3-40b8-9559-549bb5ed0264",
+      "name": "Sticky Note18"
+    },
+    {
+      "parameters": {
+        "content": "# 💰   А как же оплаты спустя время?\n\n\n\n\n",
+        "height": 200,
+        "width": 420,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -4368,
+        -4384
+      ],
+      "id": "2f537ce6-2e46-4cf4-87cf-1bf7aa878a34",
+      "name": "Sticky Note19"
+    },
+    {
+      "parameters": {
+        "content": "## 🏆   Уже на этом примере, понимаем, что в n8n можно собирать достаточно сложных телеграм ботов\n\n\n## Все благодаря универсальным нодам ♥️\n\n\n\n",
+        "height": 180,
+        "width": 540
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -5968,
+        4992
+      ],
+      "id": "fe77e3d9-3e02-42e8-80ee-4fd2d2612ac9",
+      "name": "Sticky Note20"
+    },
+    {
+      "parameters": {
+        "url": "https://google.com",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -5136,
+        4800
+      ],
+      "id": "78b1d14f-b440-4861-9dcb-0f6e47b063c8",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "path": "17dec143-445e-4b7a-b675-d9646e8346e9",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -4928,
+        4912
+      ],
+      "id": "d8470c5c-b970-400c-b0fa-2d6e066272c0",
+      "name": "Webhook1",
+      "webhookId": "17dec143-445e-4b7a-b675-d9646e8346e9"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "state",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -5024,
+        5168
+      ],
+      "id": "33e577b4-a2e1-4044-b463-0ded0791c99d",
+      "name": "Redis1",
+      "credentials": {
+        "redis": {
+          "id": "cOfuJ7yNM9fdHCnZ",
+          "name": "Redis DB for user state"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Chat_ID', ``, 'string') }}",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_notification": false
+        }
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        -2496,
+        -1904
+      ],
+      "id": "682c5a6f-d26d-44c2-a5cf-7f8bfac75380",
+      "name": "Send a text message in Telegram",
+      "webhookId": "e94ff048-d36b-4b84-ba70-8c99e04c2640",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "### 🤔  Есть даже telegram tool?!",
+        "height": 80,
+        "width": 180,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2384,
+        -1904
+      ],
+      "id": "53548a67-42ba-421f-b1b9-e8e085601005",
+      "name": "Sticky Note21"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "28e1c2c7-114a-480c-b52d-81e75cf6b9d5",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -5088,
+        3920
+      ],
+      "id": "e6e048fa-b84b-486d-ac02-501b9027afd1",
+      "name": "Успешно?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE",
+          "mode": "list",
+          "cachedResultName": "random_coffe_bot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tg_id",
+              "displayName": "tg_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nickname",
+              "displayName": "nickname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "info",
+              "displayName": "info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "start_date",
+              "displayName": "start_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Last_paired_with",
+              "displayName": "Last_paired_with",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -4640,
+        3920
+      ],
+      "id": "0069dd50-bb8b-4954-89d5-569910f5069d",
+      "name": "Обновляем данные",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0Xqc38trW9bfn5MI",
+          "name": "Google Sheets Aleron"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "user_id",
+        "text": "Оплата принята!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -4400,
+        3920
+      ],
+      "id": "4820399c-b9d6-42de-a7ad-fe9c85432e1d",
+      "name": "Оплата прошла - пользуйтесь!",
+      "webhookId": "852871ed-6dcd-48d6-9951-42ae3cc27dd2",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Все про телеграм в n8n\n![Логотип n8n](https://aguacatec.es/wp-content/uploads/2025/07/n8n-telegram-2.jpg \"Официальный логотип n8n\")",
+        "height": 580,
+        "width": 1040
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -5424,
+        -5680
+      ],
+      "typeVersion": 1,
+      "id": "f7826c45-5c08-4a3e-8e7a-8b701b3c68fe",
+      "name": "Sticky Note22"
+    },
+    {
+      "parameters": {
+        "content": "# Все про телеграм в n8n\n![Логотип n8n](https://journal.timepad.ru/wp-content/uploads/2023/01/photo_2023-01-17_17-06-01.jpg \"Официальный логотип n8n\")",
+        "height": 500,
+        "width": 840,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -6240,
+        -4688
+      ],
+      "typeVersion": 1,
+      "id": "d9e93895-8369-41e7-83a4-c727ce668cc1",
+      "name": "Sticky Note23"
+    },
+    {
+      "parameters": {
+        "content": "### 🤔  Что может отправить человек?",
+        "height": 80,
+        "width": 150,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -4480,
+        -2048
+      ],
+      "id": "6c16931f-3223-42e5-ae1b-c28482cf4d0c",
+      "name": "Sticky Note24"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE",
+          "mode": "list",
+          "cachedResultName": "random_coffe_bot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tg_id": "={{ $('Params').item.json.tg.user_id }}",
+            "name": "={{ $('Params').item.json.tg.first_name }}",
+            "nickname": "={{ $('Params').item.json.tg.username }}",
+            "info": "={{ $('Params').item.json.tg.text }}",
+            "start_date": "={{ $('Receive Message').item.json.message.date }}",
+            "status": "Active"
+          },
+          "matchingColumns": [
+            "tg_id"
+          ],
+          "schema": [
+            {
+              "id": "tg_id",
+              "displayName": "tg_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nickname",
+              "displayName": "nickname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "info",
+              "displayName": "info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "start_date",
+              "displayName": "start_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last_paired_with",
+              "displayName": "Last_paired_with",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -4448,
+        -2928
+      ],
+      "id": "919bc4de-1d46-429d-bfdd-0c92fb18c55b",
+      "name": "Обновляем инфу о человеке",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0Xqc38trW9bfn5MI",
+          "name": "Google Sheets Aleron"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE",
+          "mode": "list",
+          "cachedResultName": "random_coffe_bot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KLJ-yJE2VJbTvVaOBk7xA7dwbRJgZ0bj9Md8Rsp1mfE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tg_id": "={{ $('Params').item.json.tg.user_id }}",
+            "name": "={{ $('Params').item.json.tg.first_name }}",
+            "nickname": "={{ $('Params').item.json.tg.username }}"
+          },
+          "matchingColumns": [
+            "tg_id"
+          ],
+          "schema": [
+            {
+              "id": "tg_id",
+              "displayName": "tg_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nickname",
+              "displayName": "nickname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "info",
+              "displayName": "info",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "start_date",
+              "displayName": "start_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Last_paired_with",
+              "displayName": "Last_paired_with",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -3136,
+        -2880
+      ],
+      "id": "a52e5a21-a5ad-42cf-b1f7-6d6aa7cdf898",
+      "name": "Человека в таблицу",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0Xqc38trW9bfn5MI",
+          "name": "Google Sheets Aleron"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Обработка команд (/start /help /settings)\n",
+        "height": 660,
+        "width": 840
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3504,
+        -2976
+      ],
+      "typeVersion": 1,
+      "id": "e339656d-91d0-4622-9fd0-a9dc51902bd2",
+      "name": "Sticky Note25"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -5328,
+        3728
+      ],
+      "id": "9ee1265e-163f-4981-8f60-68a95a2f1160",
+      "name": "HTTP Request1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -5088,
+        3728
+      ],
+      "id": "03337c22-eb31-439c-b5ad-5417ee3363b8",
+      "name": "Send a text message",
+      "webhookId": "1106d2ab-2e62-4c7e-927c-2c12a642c51a",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -4864,
+        5280
+      ],
+      "id": "e2e1b1dc-e508-44cf-b6ff-516625efd9e7",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "WeINvsore1TpvdSm",
+          "name": "OpenAi Aleron key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "be kind",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -4816,
+        5072
+      ],
+      "id": "64695f33-069e-4de7-8814-0cc91b40d1ba",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "chatId": "323e",
+        "text": "nice",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -4720,
+        5312
+      ],
+      "id": "4299b82d-c69b-468e-a3c9-735efd471092",
+      "name": "Send a message",
+      "webhookId": "cf19e224-c6fc-43a3-8dd8-3a7469ad4215",
+      "credentials": {
+        "telegramApi": {
+          "id": "aenhV0CgCcWCph3j",
+          "name": "Random Coffee Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5120,
+        5008
+      ],
+      "id": "c6d34976-aec1-43cd-aa1d-88295c30544b",
+      "name": "Code нода"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Reply Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive Message": {
+      "main": [
+        [
+          {
+            "node": "Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a chat action": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Пишем первому",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Пишем второму",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a chat action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SwitchState": {
+      "main": [
+        [
+          {
+            "node": "Обновляем инфу о человеке",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SwitchTgEntities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RedisSetBaseState": {
+      "main": [
+        [
+          {
+            "node": "\"Спасибо!\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Params": {
+      "main": [
+        [
+          {
+            "node": "GetInitialState",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set State = fill_info_start": {
+      "main": [
+        [
+          {
+            "node": "Запрос инфо о себе",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SwitchCommands": {
+      "main": [
+        [
+          {
+            "node": "SetCommands",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Человека в таблицу",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Кнопка смена статуса",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "\"Вот инструкция ...\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SwitchTgEntities": {
+      "main": [
+        [
+          {
+            "node": "SwitchCommands",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetInitialState": {
+      "main": [
+        [
+          {
+            "node": "SwitchState",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive Callback": {
+      "main": [
+        [
+          {
+            "node": "Params1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Params1": {
+      "main": [
+        [
+          {
+            "node": "GetInitialState1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetInitialState1": {
+      "main": [
+        [
+          {
+            "node": "SwitchCallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message2": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SwitchCallback": {
+      "main": [
+        [
+          {
+            "node": "Set State = fill_info_start",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ставим статус Active",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ставим статус Inactive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Пишем первому": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Пишем второму": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet2": {
+      "main": [
+        []
+      ]
+    },
+    "Get a file1": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ставим статус Active": {
+      "main": [
+        [
+          {
+            "node": "Запрос инфо о себе1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ставим статус Inactive": {
+      "main": [
+        [
+          {
+            "node": "Запрос инфо о себе1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Успешно?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "Обновляем данные",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        []
+      ]
+    },
+    "Send a text message in Telegram": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Успешно?": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Обновляем данные": {
+      "main": [
+        [
+          {
+            "node": "Оплата прошла - пользуйтесь!",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Обновляем инфу о человеке": {
+      "main": [
+        [
+          {
+            "node": "RedisSetBaseState",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Человека в таблицу": {
+      "main": [
+        [
+          {
+            "node": "\"Заполните анкету + кнопка\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message1": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code нода": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "KnFQ6lGel6oPh0MG"
+  },
+  "versionId": "2bec6ab0-f35a-4117-91df-f616539ab7a8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b85f0d09f3d863b4b665ea0e3475dac5af387c16ba8aaf52f137a98c26bd5361"
+  },
+  "id": "KnFQ6lGel6oPh0MG",
+  "tags": []
+}
